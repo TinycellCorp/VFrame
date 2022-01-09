@@ -1,0 +1,222 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Cysharp.Threading.Tasks;
+using VFrame.UI.Command;
+using VFrame.UI.Command.Route;
+using VFrame.UI.Context;
+using VFrame.UI.View;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
+
+namespace VFrame.UI
+{
+    public partial class UISystem : ICommandContext
+    {
+        private static bool _isBlocking = false;
+        private static bool _isIgnoreBlocking = false;
+
+        private static readonly UniTaskCompletionSource SystemReadySource = new UniTaskCompletionSource();
+
+        private static UniTaskCompletionSource _containerReadyTask = new UniTaskCompletionSource();
+
+        private static readonly Queue<ICommand> Commands = new Queue<ICommand>();
+        private static UniTaskStatus _playCommandStatus = UniTaskStatus.Succeeded;
+
+        private static bool IsBlocking => !_isIgnoreBlocking && _isBlocking;
+
+        private static IView _entryView;
+        public ICommandContext Command => this;
+
+        private static void PlayCommands()
+        {
+            if (_playCommandStatus == UniTaskStatus.Pending) return;
+            if (SystemReadySource.Task.Status == UniTaskStatus.Pending) return;
+            if (_containerReadyTask.Task.Status == UniTaskStatus.Pending) return;
+
+            PlayCommandsAsync().Forget();
+        }
+
+        private static async UniTaskVoid PlayCommandsAsync()
+        {
+            if (!Commands.Any()) return;
+            _playCommandStatus = UniTaskStatus.Pending;
+
+            using (EnableBlocking())
+            {
+                // if (_sharedInstance == null) await SystemReadySource.Task;
+                // if (_container == null) await _containerReadyTask.Task;
+
+                await UniTask.NextFrame(PlayerLoopTiming.PostLateUpdate);
+
+                while (Commands.Any())
+                {
+                    var command = Commands.Dequeue();
+#if UNITY_EDITOR
+                    Debug.Log($"Execute: {command.GetType().Name}");
+#endif
+                    await command.Execute(_sharedInstance);
+                }
+            }
+
+            _playCommandStatus = UniTaskStatus.Succeeded;
+        }
+
+
+        private static void EnqueueCommand(ICommand command)
+        {
+            Commands.Enqueue(command);
+
+            PlayCommands();
+            // if (_playCommandStatus == UniTaskStatus.Pending) return;
+            // PlayCommandsAsync().Forget();
+        }
+
+        private static void ExecuteCacheCommand(ICommand command)
+        {
+            if (_container == null)
+            {
+                EnqueueCommand(command);
+            }
+            else
+            {
+                command.Execute(_sharedInstance);
+            }
+        }
+
+
+        public static BlockingHandler EnableBlocking()
+        {
+            _isBlocking = true;
+            return new BlockingHandler();
+        }
+
+        public readonly struct BlockingHandler : IDisposable
+        {
+            public void Dispose()
+            {
+                _isBlocking = false;
+            }
+        }
+
+        public static IgnoreBlockingHandler IgnoreBlocking()
+        {
+            _isIgnoreBlocking = true;
+            return new IgnoreBlockingHandler();
+        }
+
+        public readonly struct IgnoreBlockingHandler : IDisposable
+        {
+            public void Dispose()
+            {
+                _isIgnoreBlocking = false;
+            }
+        }
+
+        #region Entry
+
+        public static void Entry<TView>() where TView : class, IView
+        {
+            if (_entryView != null) throw new Exception("entry view is only one");
+            EnqueueCommand(new PushEntryRouteGroupCommand<TView>());
+        }
+
+        public class PushEntryRouteGroupCommand<TView> : PushRouteGroupCommandBase
+            where TView : class, IView
+        {
+            protected override IView GetNextView(ISystemContext context)
+            {
+                _entryView = context.ResolveView<TView>();
+                return _entryView;
+            }
+        }
+
+        public static bool IsVisibleEntryView()
+        {
+            return _entryView is {Alpha: > 0};
+        }
+
+        #endregion
+
+        public static void To(IView view)
+        {
+            if (IsBlocking) return;
+            EnqueueCommand(new PushRouteGroupCommand(view));
+        }
+
+        public static void To<TView>() where TView : class, IView
+        {
+            if (IsBlocking) return;
+            EnqueueCommand(new PushRouteGroupCommand<TView>());
+        }
+
+        public static void Log(string message)
+        {
+            if (IsBlocking) return;
+            EnqueueCommand(new LogCommand(message));
+        }
+
+        private class LogCommand : ICommand
+        {
+            private readonly string _log;
+
+            public LogCommand(string message)
+            {
+                _log = message;
+            }
+
+            public UniTask Execute(ISystemContext context)
+            {
+                Debug.Log(_log);
+                return UniTask.CompletedTask;
+            }
+        }
+
+        public static void To(IView view, IManipulator manipulator)
+        {
+            if (IsBlocking) return;
+            EnqueueCommand(new PushRouteGroupCommandWithManipulator(view, manipulator));
+        }
+
+        public static void To<TView>(IManipulator manipulator) where TView : class, IView
+        {
+            if (IsBlocking) return;
+            EnqueueCommand(new PushRouteGroupCommandWithManipulator<TView>(manipulator));
+        }
+
+        public static void Back()
+        {
+            if (IsBlocking) return;
+            if (!_sharedInstance.View.SafetyAny()) return;
+            EnqueueCommand(new PopRouteGroupCommand());
+        }
+
+
+        UniTask ICommandContext.Execute(ICommand command)
+        {
+            return command.Execute(this);
+        }
+
+        UniTask ICommandContext.To(IView view)
+        {
+            return new PushRouteGroupCommand(view).Execute(this);
+        }
+
+        UniTask ICommandContext.To(IView view, IManipulator manipulator)
+        {
+            return new PushRouteGroupCommandWithManipulator(view, manipulator).Execute(this);
+        }
+
+        UniTask ICommandContext.Push(IView view) => new PushCommand(view).Execute(this);
+
+        UniTask ICommandContext.Push(IView view, IManipulator manipulator) =>
+            new PushWithManipulatorCommand(view, manipulator).Execute(this);
+
+        UniTask ICommandContext.Replace(IView view) => new ReplaceCommand(view).Execute(this);
+        UniTask ICommandContext.Pop() => new PopCommand().Execute(this);
+
+        UniTask ICommandContext.Transition(IView view) => new TransitionCommand(view).Execute(this);
+        UniTask ICommandContext.TransitionPop() => new TransitionPopCommand().Execute(this);
+    }
+}

@@ -1,0 +1,6 @@
+using VFrame.UI.Module.Popup;
+
+public class #SCRIPTNAME# : ConfirmPopup<#SCRIPTNAME#>
+{
+}
+

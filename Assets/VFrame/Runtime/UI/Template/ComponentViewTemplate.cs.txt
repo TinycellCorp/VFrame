@@ -1,0 +1,14 @@
+using VFrame.UI.View;
+
+public class #SCRIPTNAME# : ComponentView<#SCRIPTNAME#>
+{
+    public override void OnEnter()
+    {
+        
+    }
+
+    public override void OnExit()
+    {
+    }
+}
+

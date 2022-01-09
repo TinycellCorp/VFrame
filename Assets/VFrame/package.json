@@ -1,0 +1,18 @@
+{
+  "name": "com.siren.vframe",
+  "displayName": "VFrame",
+  "version": "0.0.1",
+  "unity": "2021.1",
+  "description": "using VContainer framework",
+  "documentationUrl": "",
+  "dependencies": {
+    "jp.hadashikick.vcontainer": "1.9.0",
+    "com.cysharp.unitask": "2.2.5",
+    "com.unity.localization": "1.0.5"
+  },
+  "author": {
+    "name": "qkrsogusl3",
+    "email": "qkrsogusl3@gmail.com",
+    "url": ""
+  }
+}
