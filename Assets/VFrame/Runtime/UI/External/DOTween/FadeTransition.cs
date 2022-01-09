@@ -2,9 +2,9 @@
 using VFrame.UI.Animation;
 using VFrame.UI.Context;
 using VFrame.UI.Extension;
-using VFrame.UI.View;
+using VFrame.UI.Transition;
 
-namespace VFrame.UI.Transition
+namespace VFrame.UI.External
 {
     public abstract class FadeTransition : ITransition
     {

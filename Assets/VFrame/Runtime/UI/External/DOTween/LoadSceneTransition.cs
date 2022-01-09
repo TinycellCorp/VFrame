@@ -1,14 +1,12 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using VFrame.UI.Context;
 using VFrame.UI.Extension;
-using VFrame.UI.View;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using VFrame.UI.Animation;
+using VFrame.UI.Transition;
 
 
-namespace VFrame.UI.Transition
+namespace VFrame.UI.External
 {
     public class LoadSceneTransition : ITransition
     {

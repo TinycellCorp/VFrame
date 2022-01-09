@@ -1,11 +1,11 @@
-#if VFRAME_DOTWEEN
+
 using DG.Tweening;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
 using VFrame.UI.View;
 using UnityEngine;
 
-namespace VFrame.UI.Extension
+namespace VFrame.UI.External
 {
     public static class DOTweenExtensions
     {
@@ -72,4 +72,3 @@ namespace VFrame.UI.Extension
         }
     }
 }
-#endif

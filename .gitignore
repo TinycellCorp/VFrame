@@ -86,3 +86,5 @@ crashlytics-build.properties
 /[Aa]ssets/UI Toolkit*
 /[Aa]ssets/Settings*
 /[Aa]ssets/Universal*
+/[Aa]ssets/Plugins*
+/[Aa]ssets/Resources*

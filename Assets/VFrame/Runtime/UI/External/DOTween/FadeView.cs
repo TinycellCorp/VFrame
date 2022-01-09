@@ -1,7 +1,8 @@
 ﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VFrame.UI.View;
 
-namespace VFrame.UI.View
+namespace VFrame.UI.External
 {
     public class FadeView : ComponentView<FadeView>
     {

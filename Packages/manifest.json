@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.cysharp.unitask": "2.2.5",
-    "com.demigiant.dotween": "1.2.632",
     "com.unity.collab-proxy": "1.15.4",
     "com.unity.feature.2d": "1.0.0",
     "com.unity.ide.rider": "3.0.7",

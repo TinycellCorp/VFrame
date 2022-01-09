@@ -29,9 +29,19 @@
 }
 * ```
 
-# DOTween
+# pacages
 
-* add scripting define symbol
+* openupm
+
 ```text
-VFRAME_DOTWEEN
+openupm add com.cysharp.unitask
+openupm add jp.hadashikick.vcontainer
+//openupm add com.demigiant.dotween
 ```
+
+* package manager or manifest.json
+
+```text
+"com.unity.localization": "1.0.5"
+```
+

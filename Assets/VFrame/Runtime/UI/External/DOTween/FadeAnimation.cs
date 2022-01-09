@@ -1,10 +1,8 @@
-﻿#if VFRAME_DOTWEEN
-
-using Cysharp.Threading.Tasks;
-using VFrame.UI.Extension;
+﻿using Cysharp.Threading.Tasks;
+using VFrame.UI.Animation;
 using VFrame.UI.View;
 
-namespace VFrame.UI.Animation
+namespace VFrame.UI.External
 {
     public class FadeAnimation<TView> : IAnimation<TView> where TView : IView
     {
@@ -19,4 +17,3 @@ namespace VFrame.UI.Animation
         }
     }
 }
-#endif

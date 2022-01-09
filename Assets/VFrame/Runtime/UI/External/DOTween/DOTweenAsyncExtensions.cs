@@ -1,5 +1,5 @@
 ﻿// asmdef Version Defines, enabled when com.demigiant.dotween is imported.
-// #define UNITASK_DOTWEEN_SUPPORT //TODO: Version Defines
+#define UNITASK_DOTWEEN_SUPPORT //TODO: Version Defines
 #if UNITASK_DOTWEEN_SUPPORT
 
 using Cysharp.Threading.Tasks.Internal;
