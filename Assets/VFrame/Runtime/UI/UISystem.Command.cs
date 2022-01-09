@@ -134,7 +134,11 @@ namespace VFrame.UI
 
         public static bool IsVisibleEntryView()
         {
+#if UNITY_2021_2_OR_NEWER
             return _entryView is {Alpha: > 0};
+#else
+            return _entryView != null && _entryView.Alpha > 0;
+#endif
         }
 
         #endregion
