@@ -14,7 +14,7 @@ using VFrame.UI.View;
 using VContainer;
 using VContainer.Unity;
 using VFrame.Core;
-using VFrame.UI;
+using VFrame.UI.External;
 using Object = UnityEngine.Object;
 
 namespace VFrame.UI.Extension
@@ -99,7 +99,7 @@ namespace VFrame.UI.Extension
             builder.Register<IRouteFilter, TransitionRouteFilter>(Lifetime.Scoped);
             builder.Register<IRouteFilter, GroupRouteFilter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<UISystemRootInitializer>();
-            builder.RegisterViewAnimation<External.FadeView, External.FadeAnimation<External.FadeView>>();
+            builder.RegisterViewAnimation<FadeView, FadeAnimation<FadeView>>();
         }
 
         public static void UseUISystemModule(this IContainerBuilder builder,
