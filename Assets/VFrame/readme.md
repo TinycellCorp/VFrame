@@ -28,3 +28,10 @@
   ]
 }
 * ```
+
+# DOTween
+
+* add scripting define symbol
+```text
+VFRAME_DOTWEEN
+```

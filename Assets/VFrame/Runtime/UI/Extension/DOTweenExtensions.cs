@@ -1,3 +1,4 @@
+#if VFRAME_DOTWEEN
 using DG.Tweening;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
@@ -14,6 +15,7 @@ namespace VFrame.UI.Extension
             float duration,
             bool snapping = false)
         {
+            
             TweenerCore<Vector3, Vector3, VectorOptions> t = DOTween.To(
                 (DOGetter<Vector3>) (() => target.anchoredPosition),
                 (DOSetter<Vector3>) (x => target.anchoredPosition = x), new Vector3(endValue, 0.0f, 0.0f), duration);
@@ -70,3 +72,4 @@ namespace VFrame.UI.Extension
         }
     }
 }
+#endif

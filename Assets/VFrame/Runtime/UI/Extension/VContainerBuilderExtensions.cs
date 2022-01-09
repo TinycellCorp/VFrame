@@ -99,7 +99,9 @@ namespace VFrame.UI.Extension
             builder.Register<IRouteFilter, TransitionRouteFilter>(Lifetime.Scoped);
             builder.Register<IRouteFilter, GroupRouteFilter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<UISystemRootInitializer>();
+#if VFRAME_DOTWEEN
             builder.RegisterViewAnimation<FadeView, FadeAnimation<FadeView>>();
+#endif
         }
 
         public static void UseUISystemModule(this IContainerBuilder builder,
