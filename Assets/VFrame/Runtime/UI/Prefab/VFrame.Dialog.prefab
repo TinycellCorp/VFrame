@@ -523,7 +523,7 @@ GameObject:
   - component: {fileID: 5231194501399038750}
   - component: {fileID: 5231194501399038745}
   m_Layer: 5
-  m_Name: Dialog
+  m_Name: VFrame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

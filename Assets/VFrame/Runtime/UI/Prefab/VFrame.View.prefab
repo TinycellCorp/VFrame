@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5981306560767649357}
   - component: {fileID: 4893083871493471461}
   m_Layer: 5
-  m_Name: View
+  m_Name: VFrame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

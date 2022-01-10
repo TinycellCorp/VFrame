@@ -1,14 +1,16 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using VFrame.UI.Layer;
 using VFrame.UI.Module.Popup;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace VFrame.Editor.UI
 {
     public static class CreateUIPrefab
     {
-        private const string PrefabPath = "Assets/VFrame/Runtime/UI/Prefab";
         private const string MenuPath = "GameObject/VFrame";
 
         static bool TryGetComponent<T>(out T component)
@@ -30,9 +32,36 @@ namespace VFrame.Editor.UI
                 parent = Selection.activeGameObject.transform;
             }
 
-            var path = $"{PrefabPath}/{prefabName}.prefab";
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var assetName = $"VFrame.{prefabName}";
+            var findPath = $"{assetName} t:prefab";
+            var paths = AssetDatabase.FindAssets(findPath)
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .ToArray();
+
+            if (!paths.Any())
+            {
+                throw new Exception("find path is zero");
+            }
+
+            var resultPath = string.Empty;
+            foreach (var path in paths)
+            {
+                var name = Path.GetFileNameWithoutExtension(path);
+                if (name.Equals(assetName))
+                {
+                    resultPath = path;
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(resultPath))
+            {
+                throw new FileNotFoundException(prefabName);
+            }
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(resultPath);
             var view = Object.Instantiate(prefab, parent);
+            view.name = prefabName;
             Selection.activeGameObject = view;
 
             Undo.RegisterCreatedObjectUndo(view, view.name);
