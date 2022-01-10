@@ -8,43 +8,26 @@ namespace VFrame.UI.External
 {
     public abstract class FadeTransition : ITransition
     {
-        public readonly struct Handler
+        public async UniTask In(ISystemContext context, ITransitionJob job)
         {
-            private readonly FadeView _fade;
-            private readonly IAnimation _animation;
+            var animator = context.ResolveAnimator<FadeView>();
+            await animator.In();
 
-            public Handler(ISystemContext context)
-            {
-                _fade = context.ResolveView<FadeView>();
-                _animation = context.ResolveAnimation<FadeView>();
-            }
-
-            public UniTask In() => _fade.In(_animation);
-            public UniTask Out() => _fade.Out(_animation);
-        }
-
-        public async UniTask In(ISystemContext context, ITransitionExecutor executor)
-        {
-            var handler = new Handler(context);
-
-            await handler.In();
-
-            await executor.Execute();
+            await job.Execute();
             await In(context);
 
-            await handler.Out();
+            await animator.Out();
         }
 
-        public async UniTask Out(ISystemContext context, ITransitionExecutor executor)
+        public async UniTask Out(ISystemContext context, ITransitionJob job)
         {
-            var handler = new Handler(context);
+            var animator = context.ResolveAnimator<FadeView>();
+            await animator.In();
 
-            await handler.In();
-
-            await executor.Execute();
+            await job.Execute();
             await Out(context);
 
-            await handler.Out();
+            await animator.Out();
         }
 
         protected abstract UniTask In(ISystemContext context);

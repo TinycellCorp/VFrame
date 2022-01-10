@@ -8,7 +8,7 @@ namespace VFrame.UI.Command
 {
     public class TransitionPopCommand : ICommand
     {
-        private readonly OutTransitionExecutor _executor = new OutTransitionExecutor();
+        private readonly OutTransitionJob _job = new OutTransitionJob();
 
         public async UniTask Execute(ISystemContext context)
         {
@@ -17,19 +17,19 @@ namespace VFrame.UI.Command
             var outView = context.View.Pop();
             var outTransition = context.ResolveTransition(outView);
 
-            using (_executor.Init(context, outView))
+            using (_job.Init(context, outView))
             {
-                await outTransition.Out(context, _executor);
-                if (!_executor.IsExecuted)
+                await outTransition.Out(context, _job);
+                if (!_job.IsExecuted)
                 {
                     throw new Exception("require transition execute!");
                 }
 
-                await _executor.RestoreTask;
+                await _job.RestoreTask;
             }
         }
 
-        private class OutTransitionExecutor : ITransitionExecutor, IDisposable
+        private class OutTransitionJob : ITransitionJob, IDisposable
         {
             public bool IsExecuted { get; private set; }
             public UniTask RestoreTask { get; private set; }

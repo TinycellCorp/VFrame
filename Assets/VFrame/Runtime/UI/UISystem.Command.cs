@@ -141,6 +141,15 @@ namespace VFrame.UI
 #endif
         }
 
+        public static UniTask WaitUntilNextEntry()
+        {
+            if (_sharedInstance == null)
+            {
+                throw new NullReferenceException("UISystem.Instance");
+            }
+            return UniTask.WaitUntil(IsVisibleEntryView);
+        }
+
         #endregion
 
         public static void To(IView view)

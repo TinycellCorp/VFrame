@@ -16,7 +16,7 @@ namespace VFrame.UI
         }
 
 
-        private class InTransitionCommand : ICommand, ITransitionExecutor
+        private class InTransitionCommand : ICommand, ITransitionJob
         {
             private readonly ITransition _transition;
             public InTransitionCommand(ITransition transition) => _transition = transition;
@@ -29,7 +29,7 @@ namespace VFrame.UI
                 await _transition.In(context, this);
             }
 
-            UniTask ITransitionExecutor.Execute()
+            UniTask ITransitionJob.Execute()
             {
                 while (_context.View.Any())
                 {

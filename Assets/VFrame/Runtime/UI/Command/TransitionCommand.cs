@@ -13,7 +13,7 @@ namespace VFrame.UI.Command
         protected abstract IAnimation GetNextAnimation(ISystemContext context);
         protected abstract ITransition GetTransition(ISystemContext context);
 
-        private readonly InTransitionExecutor _executor = new InTransitionExecutor();
+        private readonly InTransitionJob _job = new InTransitionJob();
 
         public async UniTask Execute(ISystemContext context)
         {
@@ -24,10 +24,10 @@ namespace VFrame.UI.Command
 
                 var transition = GetTransition(context);
 
-                using (_executor.Init(context, nextView))
+                using (_job.Init(context, nextView))
                 {
-                    await transition.In(context, _executor);
-                    if (!_executor.IsExecuted)
+                    await transition.In(context, _job);
+                    if (!_job.IsExecuted)
                     {
                         throw new Exception("require transition execute!");
                     }
@@ -39,7 +39,7 @@ namespace VFrame.UI.Command
             }
         }
 
-        private class InTransitionExecutor : ITransitionExecutor, IDisposable
+        private class InTransitionJob : ITransitionJob, IDisposable
         {
             public bool IsExecuted { get; private set; }
             private ISystemContext _context;
