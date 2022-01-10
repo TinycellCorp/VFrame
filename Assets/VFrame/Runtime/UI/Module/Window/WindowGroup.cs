@@ -11,7 +11,7 @@ namespace VFrame.UI.Module.Window
         {
             if (context.View.Contains(view)) return;
 
-            if (!context.Group.Include<WindowGroup>(context.View.Peek()))
+            if (context.View.Any() && !context.Group.Include<WindowGroup>(context.View.Peek()))
             {
                 await context.Command.Push(view);
             }
