@@ -86,6 +86,12 @@ namespace VFrame.Pool.ComponentPool
         {
             return new ResolveLazyComponentPool<T>(resolver, parent);
         }
+
+        public void Clear(string key)
+        {
+            var pool = GetPool(key);
+            pool.Clear();
+        }
     }
 
     public class ResolveLazyVariantComponentPool<TParam, T> :
@@ -106,6 +112,12 @@ namespace VFrame.Pool.ComponentPool
         {
             var pool = GetPool(key);
             return pool.Rent(param);
+        }
+
+        public void Clear(string key)
+        {
+            var pool = GetPool(key);
+            pool.Clear();
         }
     }
 }

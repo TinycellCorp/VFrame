@@ -6,6 +6,7 @@ namespace VFrame.Pool.ComponentPool
     {
         T Rent(string key);
         void Return(string key, T component);
+        void Clear(string key);
     }
 
     public interface ILazyVariantComponentPool<in TParam, T> : ILazyVariantComponentPool<T>
