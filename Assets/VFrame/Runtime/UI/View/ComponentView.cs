@@ -63,6 +63,7 @@ namespace VFrame.UI.View
                 }
 
                 CanvasGroup.interactable = value;
+                CanvasGroup.blocksRaycasts = value;
             }
         }
 
