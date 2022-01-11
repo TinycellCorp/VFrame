@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.U2D;
+using UnityEngine.UI;
 using VContainer;
 using Object = UnityEngine.Object;
 
@@ -68,7 +69,6 @@ namespace VFrame.Scene
             else
             {
                 throw new KeyNotFoundException($"not found key: {key}");
-
             }
         }
 
@@ -99,7 +99,18 @@ namespace VFrame.Scene
             else
             {
                 throw new KeyNotFoundException($"not found key: {key}");
+            }
+        }
 
+        public void ApplyImage(string key, Image renderer)
+        {
+            if (_loadedSprite.TryGetValue(key, out var sprite))
+            {
+                renderer.sprite = sprite;
+            }
+            else
+            {
+                throw new KeyNotFoundException($"not found key: {key}");
             }
         }
 
@@ -127,12 +138,12 @@ namespace VFrame.Scene
             _loadedAtlas.Add(key, atlas);
         }
 
-        public void ApplySprite(string atlasKey, string spriteName, SpriteRenderer renderer)
+        private bool TryGetSpriteFromAtlas(string atlasKey, string spriteName, out Sprite result)
         {
             var key = (atlasKey, spriteName);
             if (_fromAtlasSprites.TryGetValue(key, out var loaded))
             {
-                renderer.sprite = loaded;
+                result = loaded;
             }
             else if (_loadedAtlas.TryGetValue(atlasKey, out var atlas))
             {
@@ -140,11 +151,29 @@ namespace VFrame.Scene
                 if (sprite == null) throw new KeyNotFoundException($"not found sprite: {atlasKey}[{spriteName}]");
 
                 _fromAtlasSprites.Add(key, sprite);
-                renderer.sprite = sprite;
+                result = sprite;
             }
             else
             {
                 throw new KeyNotFoundException($"not found atlas: {atlasKey}");
+            }
+
+            return result != null;
+        }
+
+        public void ApplySprite(string atlasKey, string spriteName, SpriteRenderer renderer)
+        {
+            if (TryGetSpriteFromAtlas(atlasKey, spriteName, out var sprite))
+            {
+                renderer.sprite = sprite;
+            }
+        }
+
+        public void ApplyImage(string atlasKey, string spriteName, Image renderer)
+        {
+            if (TryGetSpriteFromAtlas(atlasKey, spriteName, out var sprite))
+            {
+                renderer.sprite = sprite;
             }
         }
 
