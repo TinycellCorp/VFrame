@@ -268,9 +268,12 @@ namespace VFrame.UI
 
         T ISystemContext.Resolve<T>() => _container.Resolve<T>();
 
+
         T ISystemContext.ResolveView<T>()
         {
-            return _container.Resolve<T>();
+            var view = _container.Resolve<T>();
+            _container.Inject(view);
+            return view;
         }
 
         IAnimation ISystemContext.ResolveAnimation<T>()

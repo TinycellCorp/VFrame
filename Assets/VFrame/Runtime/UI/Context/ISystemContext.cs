@@ -11,7 +11,7 @@ namespace VFrame.UI.Context
     {
         UISystem System { get; }
         T Resolve<T>();
-        T ResolveView<T>() where T : IView;
+        T ResolveView<T>() where T : class, IView;
         IAnimation ResolveAnimation<T>() where T : class, IView;
         IAnimation ResolveAnimation(IView view);
 
