@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Audio;
+using UnityEditor.Experimental.GraphView;
 using VFrame.Extension;
 using VFrame.UI.Animation;
 using VFrame.UI.Command.Route;
@@ -21,10 +23,15 @@ namespace VFrame.UI.Extension
 {
     public static class VContainerBuilderExtensions
     {
-        public static void RegisterScopeInstance(this IContainerBuilder builder, object instance)
+        public static void RegisterScopedInstanceWithInterfaces(this IContainerBuilder builder, object instance)
         {
             EntryPointsBuilder.EnsureDispatcherRegistered(builder);
-            builder.Register(new ScopeInstanceBuilder(instance));
+            builder.Register(new ScopedInstanceWithInterfacesBuilder(instance));
+        }
+
+        public static void RegisterScopedInstance<T>(this IContainerBuilder builder, T instance) where T : class
+        {
+            builder.Register(new ScopedInstanceBuilder(instance));
         }
 
         #region Animation
@@ -80,10 +87,15 @@ namespace VFrame.UI.Extension
             builder.RegisterGroup<IPopupGroup, PopupGroup<TShadowView>>();
         }
 
-        public static void UseUISystem(this IContainerBuilder builder)
+        private static void ThrowVFrameSettingsIsNull()
         {
             if (VFrameSettings.Instance == null)
                 throw new ArgumentNullException("require VFrameSettings asset to preload assets");
+        }
+
+        public static void UseUISystem(this IContainerBuilder builder)
+        {
+            ThrowVFrameSettingsIsNull();
 
             var rootCanvasPrefab = VFrameSettings.Instance.RootCanvas;
 
@@ -100,6 +112,18 @@ namespace VFrame.UI.Extension
             builder.Register<IRouteFilter, GroupRouteFilter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<UISystemRootInitializer>();
             builder.RegisterViewAnimation<FadeView, FadeAnimation<FadeView>>();
+        }
+
+        public static void UseAudioSystem(this IContainerBuilder builder)
+        {
+            ThrowVFrameSettingsIsNull();
+            var groups = VFrameSettings.Instance.AudioGroups;
+            // foreach (var audioGroup in groups)
+            // {
+            //     builder.RegisterScopedInstance(audioGroup);
+            // }
+
+            builder.RegisterEntryPoint<AudioSystem>().AsSelf().WithParameter(groups);
         }
 
         public static void UseUISystemModule(this IContainerBuilder builder,
@@ -189,19 +213,43 @@ namespace VFrame.UI.Extension
     }
 
     /// <summary>
-    /// RegisterInstance(Lifetime.Scoped) 
+    /// RegisterInstance(Lifetime.Scoped).AsImplementedInterfaces()
     /// </summary>
-    public class ScopeInstanceBuilder : RegistrationBuilder, IRegistration
+    public class ScopedInstanceWithInterfacesBuilder : RegistrationBuilder, IRegistration
     {
         readonly object implementationInstance;
 
-        public ScopeInstanceBuilder(object implementationInstance)
+        public ScopedInstanceWithInterfacesBuilder(object implementationInstance)
             : base(implementationInstance.GetType(), Lifetime.Scoped)
         {
             this.implementationInstance = implementationInstance;
             var interfaceTypes = new List<Type> {ImplementationType};
             interfaceTypes.AddRange(ImplementationType.GetInterfaces());
             InterfaceTypes = interfaceTypes;
+        }
+
+        public override IRegistration Build() => this;
+
+        public object SpawnInstance(IObjectResolver resolver) => implementationInstance;
+
+        public Type ImplementationType => implementationInstance.GetType();
+
+        public IReadOnlyList<Type> InterfaceTypes { get; }
+
+        public Lifetime Lifetime { get; }
+    }
+
+    /// <summary>
+    /// RegisterInstance(Lifetime.Scoped)
+    /// </summary>
+    public class ScopedInstanceBuilder : RegistrationBuilder, IRegistration
+    {
+        readonly object implementationInstance;
+
+        public ScopedInstanceBuilder(object implementationInstance)
+            : base(implementationInstance.GetType(), Lifetime.Scoped)
+        {
+            this.implementationInstance = implementationInstance;
         }
 
         public override IRegistration Build() => this;

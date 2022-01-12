@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Audio;
 using UnityEngine;
 using VFrame.UI;
 
@@ -10,6 +11,7 @@ namespace VFrame.Core
         public static VFrameSettings Instance { get; private set; }
         
         public RootCanvas RootCanvas;
+        public AudioGroup[] AudioGroups;
 
 #if UNITY_EDITOR
         [UnityEditor.MenuItem("Assets/Create/VFrame/VFrame Settings")]

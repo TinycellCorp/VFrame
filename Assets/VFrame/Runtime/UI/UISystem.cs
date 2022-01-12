@@ -85,7 +85,7 @@ namespace VFrame.UI
             while (globalViews.Any())
             {
                 var view = globalViews.Dequeue();
-                builder.RegisterScopeInstance(view);
+                builder.RegisterScopedInstanceWithInterfaces(view);
             }
 
             RegisteredViews.Remove(rootScene);
@@ -99,7 +99,7 @@ namespace VFrame.UI
             while (views.Any())
             {
                 var view = views.Dequeue();
-                builder.RegisterScopeInstance(view);
+                builder.RegisterScopedInstanceWithInterfaces(view);
             }
 
             RegisteredViews.Remove(scene);

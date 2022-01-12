@@ -1,4 +1,5 @@
-﻿using VFrame.UI.Component.Buttons;
+﻿using Audio;
+using VFrame.UI.Component.Buttons;
 using VFrame.UI.Component.Events;
 using UnityEditor;
 using UnityEngine.UI;
@@ -40,6 +41,15 @@ namespace VFrame.Editor.UI
             var target = command.context as Button;
             if (target == null) return;
             Undo.AddComponent<BackButton>(target.gameObject);
+        }
+
+
+        [MenuItem("CONTEXT/Button/Play Audio")]
+        static void ButtonPlayAudio(MenuCommand command)
+        {
+            var target = command.context as Button;
+            if (target == null) return;
+            Undo.AddComponent<PlayAudioFromButton>(target.gameObject);
         }
     }
 }
