@@ -62,8 +62,6 @@ namespace VFrame.UI
         {
         }
 
-    
-
 
         private static IAnimation GetDefaultAnimation(IObjectResolver resolver)
         {
@@ -82,6 +80,14 @@ namespace VFrame.UI
         {
             if (!RegisteredViews.TryGetValue(rootScene, out var globalViews)) return;
 
+            var viewsArray = globalViews.ToArray();
+            builder.RegisterBuildCallback(_ =>
+            {
+                foreach (var view in viewsArray)
+                {
+                    _.Inject(view);
+                }
+            });
             while (globalViews.Any())
             {
                 var view = globalViews.Dequeue();
@@ -96,6 +102,15 @@ namespace VFrame.UI
             // _uiScope = sceneScope;
             var scene = sceneScope.gameObject.scene;
             if (!RegisteredViews.TryGetValue(scene, out var views)) return;
+
+            var viewsArray = views.ToArray();
+            builder.RegisterBuildCallback(_ =>
+            {
+                foreach (var view in viewsArray)
+                {
+                    _.Inject(view);
+                }
+            });
             while (views.Any())
             {
                 var view = views.Dequeue();
@@ -130,18 +145,20 @@ namespace VFrame.UI
                 _container = resolver;
                 _containerReadyTask.TrySetResult();
             }
+
             PlayCommands();
         }
+
         public static void Clear(LifetimeScope scope)
         {
             var scene = scope.gameObject.scene;
-            
+
             _containerReadyTask = new UniTaskCompletionSource();
             _container = null;
 
             _entryView = null;
         }
-        
+
         private static bool _isBlockingRegisterView = false;
 
         private readonly struct BlockingRegisterViewHandler : IDisposable
@@ -269,12 +286,7 @@ namespace VFrame.UI
         T ISystemContext.Resolve<T>() => _container.Resolve<T>();
 
 
-        T ISystemContext.ResolveView<T>()
-        {
-            var view = _container.Resolve<T>();
-            _container.Inject(view);
-            return view;
-        }
+        T ISystemContext.ResolveView<T>() => _container.Resolve<T>();
 
         IAnimation ISystemContext.ResolveAnimation<T>()
         {
