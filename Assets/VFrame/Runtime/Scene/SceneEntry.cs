@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using VFrame.Pool.ComponentPool;
@@ -16,6 +17,7 @@ namespace VFrame.Scene
         private readonly IObjectResolver _resolver;
 
         private readonly IPreloader _preloader;
+
         protected AssetCache Assets { get; private set; }
 
         public SceneEntry(IObjectResolver resolver)
@@ -71,6 +73,13 @@ namespace VFrame.Scene
         protected virtual UniTask PostStartAsync(CancellationToken cancellation)
         {
             return UniTask.CompletedTask;
+        }
+
+        
+        public CancellationToken GetCancellationTokenOnDestroy()
+        {
+            var scope = _resolver.Resolve<LifetimeScope>();
+            return scope.GetCancellationTokenOnDestroy();
         }
 
         public void Dispose()

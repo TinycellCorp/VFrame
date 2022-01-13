@@ -76,33 +76,8 @@ namespace VFrame.UI
 
         #region Static Methods
 
-        public static void RootConfigure(UnityEngine.SceneManagement.Scene rootScene, IContainerBuilder builder)
+        private static void RegisterViewsWithBuildCallback(IContainerBuilder builder, Queue<ComponentView> views)
         {
-            if (!RegisteredViews.TryGetValue(rootScene, out var globalViews)) return;
-
-            var viewsArray = globalViews.ToArray();
-            builder.RegisterBuildCallback(_ =>
-            {
-                foreach (var view in viewsArray)
-                {
-                    _.Inject(view);
-                }
-            });
-            while (globalViews.Any())
-            {
-                var view = globalViews.Dequeue();
-                builder.RegisterScopedInstanceWithInterfaces(view);
-            }
-
-            RegisteredViews.Remove(rootScene);
-        }
-
-        public static void Configure(LifetimeScope sceneScope, IContainerBuilder builder)
-        {
-            // _uiScope = sceneScope;
-            var scene = sceneScope.gameObject.scene;
-            if (!RegisteredViews.TryGetValue(scene, out var views)) return;
-
             var viewsArray = views.ToArray();
             builder.RegisterBuildCallback(_ =>
             {
@@ -116,13 +91,27 @@ namespace VFrame.UI
                 var view = views.Dequeue();
                 builder.RegisterScopedInstanceWithInterfaces(view);
             }
+        }
+
+        public static void RootConfigure(UnityEngine.SceneManagement.Scene rootScene, IContainerBuilder builder)
+        {
+            if (!RegisteredViews.TryGetValue(rootScene, out var globalViews)) return;
+            RegisterViewsWithBuildCallback(builder, globalViews);
+            RegisteredViews.Remove(rootScene);
+        }
+
+        public static void Configure(LifetimeScope sceneScope, IContainerBuilder builder)
+        {
+            var scene = sceneScope.gameObject.scene;
+            if (!RegisteredViews.TryGetValue(scene, out var views)) return;
+
+            RegisterViewsWithBuildCallback(builder, views);
 
             RegisteredViews.Remove(scene);
 
             ConfigureDefaultAnimation(sceneScope);
 
             PlayCommands();
-            // PlayCommandsAsync().Forget();
 
             void ConfigureDefaultAnimation(LifetimeScope scope)
             {

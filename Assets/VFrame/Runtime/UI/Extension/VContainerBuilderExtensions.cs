@@ -118,12 +118,13 @@ namespace VFrame.UI.Extension
         {
             ThrowVFrameSettingsIsNull();
             var groups = VFrameSettings.Instance.AudioGroups;
-            // foreach (var audioGroup in groups)
-            // {
-            //     builder.RegisterScopedInstance(audioGroup);
-            // }
-
-            builder.RegisterEntryPoint<AudioSystem>().AsSelf().WithParameter(groups);
+            builder.RegisterEntryPoint<AudioSystem>().AsSelf()
+                .WithParameter(groups)
+                .WithParameter(new Dictionary<string, IAudioSourcePlayer>
+                {
+                    {"SFX", new PlayOneShotPlayer()},
+                    {"BGM", new BGMPlayer()}
+                });
         }
 
         public static void UseUISystemModule(this IContainerBuilder builder,

@@ -25,9 +25,12 @@ namespace VFrame.Extension
 
         private bool _isDisposed = false;
 
+        private readonly UniTask<TObject> _task;
+
         public AddressableReference(AsyncOperationHandle<TObject> handle)
         {
             _handle = handle;
+            _task = _handle.Task.AsUniTask();
         }
 
         public bool TryGetAsset(out TObject asset)
@@ -51,8 +54,8 @@ namespace VFrame.Extension
 
         public void Dispose()
         {
-            if(_isDisposed) return;
-            
+            if (_isDisposed) return;
+
             if (TryGetAsset(out var asset))
             {
                 OnPreRelease(asset);
@@ -68,7 +71,7 @@ namespace VFrame.Extension
 
         public UniTask<TObject> AsUniTask()
         {
-            return _handle.Task.AsUniTask();
+            return _task;
         }
     }
 
