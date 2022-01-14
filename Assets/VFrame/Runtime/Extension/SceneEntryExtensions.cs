@@ -1,6 +1,6 @@
 ﻿using System;
-using Audio;
 using Cysharp.Threading.Tasks;
+using VFrame.Audio;
 using VFrame.Scene;
 
 namespace VFrame.Extension

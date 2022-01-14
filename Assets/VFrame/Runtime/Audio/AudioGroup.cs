@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Audio;
 
-namespace Audio
+namespace VFrame.Audio
 {
     [CreateAssetMenu(fileName = "New Audio Group", menuName = "VFrame/Audio Group")]
     public class AudioGroup : ScriptableObject

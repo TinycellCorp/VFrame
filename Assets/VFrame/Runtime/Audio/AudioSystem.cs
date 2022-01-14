@@ -7,56 +7,8 @@ using VContainer.Unity;
 using VFrame.Extension;
 using Object = UnityEngine.Object;
 
-namespace Audio
+namespace VFrame.Audio
 {
-    public interface IAudioSourcePlayer
-    {
-        void Ready(AudioSource source);
-        void Play(AudioSource source, AudioClip clip);
-    }
-
-    public class PlayOneShotPlayer : IAudioSourcePlayer
-    {
-        public void Ready(AudioSource source)
-        {
-            source.loop = false;
-        }
-
-        public void Play(AudioSource source, AudioClip clip)
-        {
-            source.PlayOneShot(clip);
-        }
-    }
-
-    public class BGMPlayer : IAudioSourcePlayer
-    {
-        public void Ready(AudioSource source)
-        {
-            source.loop = true;
-        }
-
-        public void Play(AudioSource source, AudioClip clip)
-        {
-            source.Stop();
-            source.clip = clip;
-            source.Play();
-        }
-    }
-
-    public class AssetReferencePointer
-    {
-        public AudioGroup Group { get; }
-
-        public AssetReferenceT<AudioClip> AssetReference => Group.Clips[_index].Asset;
-        private readonly int _index;
-
-        public AssetReferencePointer(AudioGroup audioGroup, int index)
-        {
-            Group = audioGroup;
-            _index = index;
-        }
-    }
-
     public class AudioSystem : IInitializable
     {
         private static AudioSystem _sharedInstance;

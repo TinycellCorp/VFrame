@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Audio
+namespace VFrame.Audio
 {
     [AddComponentMenu("Tiny/UI/Button/PlayAudio.Key")]
     [RequireComponent(typeof(Button))]

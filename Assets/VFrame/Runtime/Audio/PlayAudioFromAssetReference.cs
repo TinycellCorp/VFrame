@@ -2,7 +2,7 @@
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
-namespace Audio
+namespace VFrame.Audio
 {
     [AddComponentMenu("Tiny/UI/Button/PlayAudio.AssetReference")]
     [RequireComponent(typeof(Button))]

@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Audio;
-using UnityEditor.Experimental.GraphView;
 using VFrame.Extension;
 using VFrame.UI.Animation;
 using VFrame.UI.Command.Route;
@@ -15,6 +13,7 @@ using VFrame.UI.Transition;
 using VFrame.UI.View;
 using VContainer;
 using VContainer.Unity;
+using VFrame.Audio;
 using VFrame.Core;
 using VFrame.UI.External;
 using Object = UnityEngine.Object;
@@ -126,6 +125,36 @@ namespace VFrame.UI.Extension
                     {"BGM", new BGMPlayer()}
                 });
         }
+
+        public static void UseAudioSystem(this IContainerBuilder builder, Action<AudioSystemBuilder> configuration)
+        {
+            ThrowVFrameSettingsIsNull();
+            var groups = VFrameSettings.Instance.AudioGroups;
+            var registration = builder.RegisterEntryPoint<AudioSystem>().AsSelf().WithParameter(groups);
+
+            var audioSystemBuilder = new AudioSystemBuilder(builder);
+            configuration(audioSystemBuilder);
+            registration.WithParameter(audioSystemBuilder.Players);
+        }
+
+        public readonly struct AudioSystemBuilder
+        {
+            private readonly IContainerBuilder _builder;
+
+            public readonly Dictionary<string, IAudioSourcePlayer> Players;
+
+            public AudioSystemBuilder(IContainerBuilder builder)
+            {
+                _builder = builder;
+                Players = new Dictionary<string, IAudioSourcePlayer>();
+            }
+
+            public void AddPlayer(string mixerName, IAudioSourcePlayer player)
+            {
+                Players.Add(mixerName, player);
+            }
+        }
+
 
         public static void UseUISystemModule(this IContainerBuilder builder,
             Action<UISystemModuleBuilder> configuration)

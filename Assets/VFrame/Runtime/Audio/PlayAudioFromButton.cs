@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Audio
+namespace VFrame.Audio
 {
     public abstract class PlayAudioFromButton : MonoBehaviour, IPointerDownHandler
     {
