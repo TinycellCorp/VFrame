@@ -147,6 +147,7 @@ namespace VFrame.UI
             {
                 throw new NullReferenceException("UISystem.Instance");
             }
+
             return UniTask.WaitUntil(IsVisibleEntryView);
         }
 
@@ -198,10 +199,19 @@ namespace VFrame.UI
             EnqueueCommand(new PushRouteGroupCommandWithManipulator<TView>(manipulator));
         }
 
-        public static void Back()
+        public static void Back(bool isThrowEmpty = false)
         {
             if (IsBlocking) return;
-            if (!_sharedInstance.View.SafetyAny()) return;
+            if (!_sharedInstance.View.SafetyAny())
+            {
+                if (isThrowEmpty)
+                {
+                    throw new EmptySafetyAnyException();
+                }
+
+                return;
+            }
+
             EnqueueCommand(new PopRouteGroupCommand());
         }
 
@@ -231,5 +241,9 @@ namespace VFrame.UI
 
         UniTask ICommandContext.Transition(IView view) => new TransitionCommand(view).Execute(this);
         UniTask ICommandContext.TransitionPop() => new TransitionPopCommand().Execute(this);
+    }
+
+    public class EmptySafetyAnyException : Exception
+    {
     }
 }
