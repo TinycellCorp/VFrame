@@ -44,12 +44,21 @@ namespace VFrame.Editor.UI
         }
 
 
-        [MenuItem("CONTEXT/Button/Play Audio")]
-        static void ButtonPlayAudio(MenuCommand command)
+        [MenuItem("CONTEXT/Button/Play Audio - Key")]
+        static void ButtonPlayAudioFromKey(MenuCommand command)
         {
             var target = command.context as Button;
             if (target == null) return;
-            Undo.AddComponent<PlayAudioFromButton>(target.gameObject);
+            Undo.AddComponent<PlayAudioFromKey>(target.gameObject);
+        }
+
+
+        [MenuItem("CONTEXT/Button/Play Audio - Asset Reference")]
+        static void ButtonPlayAudioFromAssetReference(MenuCommand command)
+        {
+            var target = command.context as Button;
+            if (target == null) return;
+            Undo.AddComponent<PlayAudioFromAssetReference>(target.gameObject);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using VContainer.Unity;
 using VFrame.Extension;
 using Object = UnityEngine.Object;
@@ -42,6 +43,20 @@ namespace Audio
         }
     }
 
+    public class AssetReferencePointer
+    {
+        public AudioGroup Group { get; }
+
+        public AssetReferenceT<AudioClip> AssetReference => Group.Clips[_index].Asset;
+        private readonly int _index;
+
+        public AssetReferencePointer(AudioGroup audioGroup, int index)
+        {
+            Group = audioGroup;
+            _index = index;
+        }
+    }
+
     public class AudioSystem : IInitializable
     {
         private static AudioSystem _sharedInstance;
@@ -49,8 +64,8 @@ namespace Audio
         private readonly Dictionary<string, AudioSource> _mixerNameToAudioSources =
             new Dictionary<string, AudioSource>();
 
-        private readonly Dictionary<string, (AudioGroup group, int clipIndex)> _keyToAudioData =
-            new Dictionary<string, (AudioGroup group, int clipIndex)>();
+        private readonly Dictionary<string, AssetReferencePointer> _keyToPointers =
+            new Dictionary<string, AssetReferencePointer>();
 
         private readonly Dictionary<string, AudioClipReference> _keyToClipReferences =
             new Dictionary<string, AudioClipReference>();
@@ -98,7 +113,7 @@ namespace Audio
                 var clip = audioGroup.Clips[i];
                 if (!string.IsNullOrEmpty(clip.Key) && clip.Asset.RuntimeKeyIsValid())
                 {
-                    _keyToAudioData.Add(clip.Key, (audioGroup, i));
+                    _keyToPointers.Add(clip.Key, new AssetReferencePointer(audioGroup, i));
                 }
 #if UNITY_EDITOR
                 else
@@ -137,20 +152,25 @@ namespace Audio
         private bool IsLoading(string key)
         {
             if (!_keyToClipReferences.TryGetValue(key, out var reference)) return false;
+            return reference.AsUniTask().Status == UniTaskStatus.Pending;
+        }
 
-            var status = reference.AsUniTask().Status;
-            return status == UniTaskStatus.Pending;
+        private bool IsLoaded(string key)
+        {
+            if (!_keyToClipReferences.TryGetValue(key, out var reference)) return false;
+            return reference.AsUniTask().Status != UniTaskStatus.Pending;
         }
 
         private async UniTask Preload(string key)
         {
-            if (IsLoading(key)) return; //TODO: or ContinueWith
-            if (_keyToClipReferences.ContainsKey(key)) return;
+            if (_keyToClipReferences.ContainsKey(key)) return; //Has Clip Reference
 
-            if (!_keyToAudioData.TryGetValue(key, out var data)) return;
-            if (!TryLoadAudioClipWithCache(key, data.group, data.clipIndex, out var reference)) return;
-
-            await reference.AsUniTask();
+            //Loading
+            {
+                if (!_keyToPointers.TryGetValue(key, out var pointer)) return;
+                var reference = LoadAudioClipWithCache(key, pointer);
+                await reference.AsUniTask();
+            }
         }
 
         private async UniTask LoadAudioDataAsync(string key)
@@ -165,27 +185,21 @@ namespace Audio
             }
         }
 
-        private bool TryLoadAudioClipWithCache(string key, AudioGroup audioGroup, int index,
-            out AudioClipReference reference)
+        private AudioClipReference LoadAudioClipWithCache(string key, AssetReferencePointer pointer)
         {
-            if (index >= audioGroup.Clips.Length)
-            {
-                reference = null;
-                return false;
-            }
-
-            reference = audioGroup.Clips[index].Asset.LoadAssetAsync().ToReference();
+            var reference = pointer.AssetReference.LoadAssetAsync().ToReference();
             _keyToClipReferences.Add(key, reference);
-            return true;
+            return reference;
         }
 
         private void LoadAndPlay(string key)
         {
             if (IsLoading(key)) return; //TODO: or ContinueWith
-            if (!_keyToAudioData.TryGetValue(key, out var data)) return;
-            if (!_mixerNameToAudioSources.TryGetValue(data.group.MixerGroup.name, out var source)) return;
+            if (!_keyToPointers.TryGetValue(key, out var pointer)) return;
 
-            var mixerName = data.group.MixerGroup.name;
+            var mixerName = pointer.Group.MixerGroup.name;
+            if (!_mixerNameToAudioSources.TryGetValue(mixerName, out var source)) return;
+
             if (_keyToClipReferences.TryGetValue(key, out var clipReference))
             {
                 if (clipReference.TryGetAsset(out var loadedClip))
@@ -197,8 +211,9 @@ namespace Audio
                     LazyPlay(key, mixerName, source, clipReference);
                 }
             }
-            else if (TryLoadAudioClipWithCache(key, data.group, data.clipIndex, out var reference))
+            else
             {
+                var reference = LoadAudioClipWithCache(key, pointer);
                 LazyPlay(key, mixerName, source, reference);
             }
         }
@@ -240,17 +255,30 @@ namespace Audio
 
         public static void Play(string key)
         {
+            if (string.IsNullOrEmpty(key)) return;
             _sharedInstance.LoadAndPlay(key);
+        }
+
+        public static UniTask LoadAddressable(string key)
+        {
+            return _sharedInstance.Preload(key);
+        }
+
+        public static UniTask LoadAudioData(string key)
+        {
+            return _sharedInstance.LoadAudioDataAsync(key);
         }
 
         public static async UniTask Use(string key)
         {
+            if (string.IsNullOrEmpty(key)) return;
             await _sharedInstance.Preload(key);
             await _sharedInstance.LoadAudioDataAsync(key);
         }
 
         public static void DisposeAudioClip(string key)
         {
+            if (string.IsNullOrEmpty(key)) return;
             var references = _sharedInstance._keyToClipReferences;
             if (references.TryGetValue(key, out var reference))
             {
@@ -269,6 +297,24 @@ namespace Audio
                 reference.Dispose();
                 references.Remove(key);
             }
+        }
+
+        public static string AssetReferenceToKey(AssetReferenceT<AudioClip> assetReference)
+        {
+            if (!assetReference.RuntimeKeyIsValid())
+            {
+                return String.Empty;
+            }
+
+            foreach (var pair in _sharedInstance._keyToPointers)
+            {
+                if (pair.Value.AssetReference.RuntimeKey.Equals(assetReference.RuntimeKey))
+                {
+                    return pair.Key;
+                }
+            }
+
+            return string.Empty;
         }
 
         #endregion
