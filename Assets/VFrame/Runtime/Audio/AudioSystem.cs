@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Audio;
 using VContainer.Unity;
 using VFrame.Extension;
 using Object = UnityEngine.Object;
@@ -26,10 +27,18 @@ namespace VFrame.Audio
 
         private readonly GameObject _audioSourceParent;
 
-        public AudioSystem(AudioGroup[] groups, Dictionary<string, IAudioSourcePlayer> players)
+        private readonly IAudioSourcePropertyReader _audioSourcePropertyReader;
+        private readonly IAudioSourcePropertyWriter _audioSourcePropertyWriter;
+
+        public AudioSystem(AudioGroup[] groups,
+            IAudioSourcePropertyReader reader,
+            IAudioSourcePropertyWriter writer,
+            Dictionary<string, IAudioSourcePlayer> players)
         {
             _sharedInstance = this;
             _sourcePlayers = players ?? new Dictionary<string, IAudioSourcePlayer>();
+            _audioSourcePropertyReader = reader;
+            _audioSourcePropertyWriter = writer;
 
             _audioSourceParent = new GameObject("AudioSystem");
             Object.DontDestroyOnLoad(_audioSourceParent);
@@ -44,19 +53,27 @@ namespace VFrame.Audio
         {
         }
 
+        private AudioSource CreateAudioSource(AudioMixerGroup group, Transform parent)
+        {
+            var source = new GameObject(group.name).AddComponent<AudioSource>();
+            source.transform.SetParent(parent);
+            source.outputAudioMixerGroup = group;
+            source.playOnAwake = false;
+
+            if (_sourcePlayers.TryGetValue(group.name, out var player))
+                player.Ready(source);
+
+            _audioSourcePropertyReader.Read(group.name, source);
+
+            return source;
+        }
+
         private void MergeGroup(AudioGroup audioGroup, Transform parent)
         {
             var mixerName = audioGroup.MixerGroup.name;
             if (!_mixerNameToAudioSources.ContainsKey(mixerName))
             {
-                var source = new GameObject(mixerName).AddComponent<AudioSource>();
-                source.transform.SetParent(parent);
-                source.outputAudioMixerGroup = audioGroup.MixerGroup;
-                source.playOnAwake = false;
-
-                if (_sourcePlayers.TryGetValue(mixerName, out var player))
-                    player.Ready(source);
-
+                var source = CreateAudioSource(audioGroup.MixerGroup, parent);
                 _mixerNameToAudioSources.Add(mixerName, source);
             }
 
@@ -172,18 +189,24 @@ namespace VFrame.Audio
 
         private AudioSourceController AccessAudioSource(string mixerName)
         {
-            //TryGetValue(mixerName, source)
-            return new AudioSourceController(null);
+            if (_mixerNameToAudioSources.TryGetValue(mixerName, out var source))
+            {
+                return new AudioSourceController(this, mixerName, source);
+            }
+
+            throw new KeyNotFoundException(mixerName);
         }
 
         public readonly struct AudioSourceController : IDisposable
         {
+            private readonly AudioSystem _system;
+            private readonly string _mixerName;
             private readonly AudioSource _source;
 
             public float Volume
             {
                 get => _source.volume;
-                set => _source.volume = value;
+                set => _source.volume = Mathf.Clamp(value, 0f, 1f);
             }
 
             public bool Mute
@@ -192,14 +215,16 @@ namespace VFrame.Audio
                 set => _source.mute = value;
             }
 
-            public AudioSourceController(AudioSource source)
+            public AudioSourceController(AudioSystem system, string mixerName, AudioSource source)
             {
+                _system = system;
+                _mixerName = mixerName;
                 _source = source;
             }
 
             public void Dispose()
             {
-                //TODO: Save Changes
+                _system._audioSourcePropertyWriter.Write(_mixerName, _source);
             }
         }
 
@@ -269,6 +294,40 @@ namespace VFrame.Audio
             return string.Empty;
         }
 
+        public static AudioSourceController AudioSource(string mixerName)
+        {
+            return _sharedInstance.AccessAudioSource(mixerName);
+        }
+
         #endregion
+    }
+
+    public interface IAudioSourcePropertyWriter
+    {
+        void Write(string mixerName, AudioSource source);
+    }
+
+    public interface IAudioSourcePropertyReader
+    {
+        void Read(string mixerName, AudioSource source);
+    }
+
+    public class AudioSourcePropertyToPlayerPrefs : IAudioSourcePropertyReader, IAudioSourcePropertyWriter
+    {
+        public void Read(string mixerName, AudioSource source)
+        {
+            var volume = PlayerPrefs.GetFloat($"{mixerName}.volume", 1);
+            var mute = PlayerPrefs.GetInt($"{mixerName}.mute", 0);
+
+            source.volume = volume;
+            source.mute = mute == 1;
+        }
+
+        public void Write(string mixerName, AudioSource source)
+        {
+            PlayerPrefs.SetFloat($"{mixerName}.volume", source.volume);
+            PlayerPrefs.SetInt($"{mixerName}.mute", source.mute ? 1 : 0);
+            PlayerPrefs.Save();
+        }
     }
 }

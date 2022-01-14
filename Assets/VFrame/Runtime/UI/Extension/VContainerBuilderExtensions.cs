@@ -153,6 +153,13 @@ namespace VFrame.UI.Extension
             {
                 Players.Add(mixerName, player);
             }
+
+            public void SavePlayerPrefs()
+            {
+                _builder.Register<AudioSourcePropertyToPlayerPrefs>(Lifetime.Singleton)
+                    .As<IAudioSourcePropertyReader>()
+                    .As<IAudioSourcePropertyWriter>();
+            }
         }
 
 
