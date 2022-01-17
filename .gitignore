@@ -88,3 +88,4 @@ crashlytics-build.properties
 /[Aa]ssets/Universal*
 /[Aa]ssets/Plugins*
 /[Aa]ssets/Resources*
+/Docs

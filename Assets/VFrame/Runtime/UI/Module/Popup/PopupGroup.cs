@@ -36,14 +36,14 @@ namespace VFrame.UI.Module.Popup
             shadow.Rect.SetAsLastSibling();
             view.Rect.SetAsLastSibling();
 
-            if (context.View.TryGetManipulator(view, out var manipulator))
-            {
-                await context.Command.Push(view, manipulator);
-            }
-            else
-            {
+            // if (context.View.TryGetManipulator(view, out var manipulator))
+            // {
+            //     await context.Command.Push(view, manipulator);
+            // }
+            // else
+            // {
                 await context.Command.Push(view);
-            }
+            // }
 
             _views.Push(view);
         }

@@ -79,7 +79,7 @@ namespace VFrame.UI
             _manipulators[view] = manipulator;
         }
 
-        bool IViewContext.TryGetManipulator(IView view, out IManipulator manipulator)
+        bool IViewContext.TryPopManipulator(IView view, out IManipulator manipulator)
         {
             var has = _manipulators.TryGetValue(view, out manipulator);
             _manipulators.Remove(view);

@@ -22,8 +22,13 @@ namespace VFrame.UI.Command
             }
 
             await view.Ready(); //TODO: throw
+            if (context.View.TryPopManipulator(view, out var manipulator))
+            {
+                await manipulator.Ready(view);  
+            }
+
             await PostReadyAsync(view);
-            
+
             context.View.Push(view);
 
             view.IsActive = true;

@@ -11,7 +11,7 @@ namespace VFrame.UI.Module.Toast
         public async UniTask Push(ISystemContext context, IView view)
         {
             if (!(context.ResolveAnimation(view) is CancelableAnimation animation)) return;
-            if (!context.View.TryGetManipulator(view, out var manipulator)) return;
+            if (!context.View.TryPopManipulator(view, out var manipulator)) return;
 
             var animator = new CancelableViewAnimator(view, animation, manipulator);
             animator.Cancel();
