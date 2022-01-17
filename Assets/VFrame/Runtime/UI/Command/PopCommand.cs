@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using VFrame.UI.Context;
 
@@ -21,11 +22,16 @@ namespace VFrame.UI.Command
                     restoreView.IsActive = true;
                     var restoreAnimation = context.ResolveAnimation(restoreView);
 
-                    await UniTask.WhenAll(
+                    await (
                         outAnimation.Out(outView),
                         restoreAnimation.In(restoreView)
                     );
-                    
+
+                    // await UniTask.WhenAll(
+                    //     outAnimation.Out(outView),
+                    //     restoreAnimation.In(restoreView)
+                    // );
+
                     outView.IsActive = false;
                     outView.OnExit();
                     restoreView.OnEnter();
@@ -46,6 +52,7 @@ namespace VFrame.UI.Command
         }
     }
 
+    [Obsolete]
     public class PopParallelCommand : ICommand
     {
         public async UniTask Execute(ISystemContext context)
