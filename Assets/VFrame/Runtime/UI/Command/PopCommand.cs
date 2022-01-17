@@ -25,15 +25,17 @@ namespace VFrame.UI.Command
                         outAnimation.Out(outView),
                         restoreAnimation.In(restoreView)
                     );
+                    
+                    outView.IsActive = false;
+                    outView.OnExit();
+                    restoreView.OnEnter();
                 }
                 else
                 {
                     await outAnimation.Out(outView);
+                    outView.IsActive = false;
+                    outView.OnExit();
                 }
-
-                outView.IsActive = false;
-                outView.OnExit();
-                restoreView.OnEnter();
             }
             else
             {
