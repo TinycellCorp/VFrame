@@ -19,8 +19,14 @@ namespace VFrame.UI.Command.Route
                 if (isSuccess) return;
             }
 
-            await context.Command.Push(view);
+            if (context.View.TryPopManipulator(view, out var manipulator))
+            {
+                await context.Command.Push(view, manipulator);
+            }
+            else
+            {
+                await context.Command.Push(view);
+            }
         }
     }
-
 }

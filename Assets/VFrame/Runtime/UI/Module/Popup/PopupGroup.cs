@@ -11,6 +11,7 @@ namespace VFrame.UI.Module.Popup
     {
         private readonly Stack<IView> _views = new Stack<IView>();
         private TShadow _shadow;
+
         public async UniTask Push(ISystemContext context, IView view)
         {
             if (ReferenceEquals(context.View.Peek(), view))
@@ -20,7 +21,7 @@ namespace VFrame.UI.Module.Popup
 
             if (_views.Contains(view)) return;
 
-            var shadow = context.ResolveView<TShadow>();    
+            var shadow = context.ResolveView<TShadow>();
             if (!shadow.IsActive && _views.Count == 0)
             {
                 if (shadow.Rect.parent != view.Rect.parent)
@@ -36,14 +37,14 @@ namespace VFrame.UI.Module.Popup
             shadow.Rect.SetAsLastSibling();
             view.Rect.SetAsLastSibling();
 
-            // if (context.View.TryGetManipulator(view, out var manipulator))
-            // {
-            //     await context.Command.Push(view, manipulator);
-            // }
-            // else
-            // {
+            if (context.View.TryPopManipulator(view, out var manipulator))
+            {
+                await context.Command.Push(view, manipulator);
+            }
+            else
+            {
                 await context.Command.Push(view);
-            // }
+            }
 
             _views.Push(view);
         }
