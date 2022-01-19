@@ -11,7 +11,6 @@ namespace VFrame.UI.Module.Popup
     {
         private readonly Stack<IView> _views = new Stack<IView>();
         private TShadow _shadow;
-
         public async UniTask Push(ISystemContext context, IView view)
         {
             if (ReferenceEquals(context.View.Peek(), view))
@@ -61,9 +60,9 @@ namespace VFrame.UI.Module.Popup
             }
             else
             {
-                await context.Command.Pop();
                 var shadow = context.ResolveView<TShadow>();
                 shadow.Rect.SetSiblingIndex(shadow.Rect.GetSiblingIndex() - 1);
+                await context.Command.Pop();
             }
         }
 

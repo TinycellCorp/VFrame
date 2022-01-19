@@ -83,18 +83,21 @@ namespace VFrame.Editor.UI
 
 
         [MenuItem(MenuPath + "/View", true)]
-        [MenuItem(MenuPath + "/ConfirmPopup", true)]
-        [MenuItem(MenuPath + "/DialogPopup", true)]
         static bool IsValidateView() => TryGetComponent(out CanvasLayer component);
 
         [MenuItem(MenuPath + "/View")]
         static void CreateView() => CreateInstance<CanvasLayer>("View");
 
+
+        [MenuItem(MenuPath + "/ConfirmPopup", true)]
+        [MenuItem(MenuPath + "/DialogPopup", true)]
+        static bool IsValidatePopup() => TryGetComponent(out Canvas component);
+
         [MenuItem(MenuPath + "/ConfirmPopup")]
-        static void CreateConfirmPopup() => CreateInstance<CanvasLayer>("Confirm");
+        static void CreateConfirmPopup() => CreateInstance<Canvas>("Confirm");
 
         [MenuItem(MenuPath + "/DialogPopup")]
-        static void CreateDialogPopup() => CreateInstance<CanvasLayer>("Dialog");
+        static void CreateDialogPopup() => CreateInstance<Canvas>("Dialog");
 
 
         [MenuItem(MenuPath + "/AutoAttach")]
@@ -104,7 +107,7 @@ namespace VFrame.Editor.UI
             {
                 var target = Selection.activeGameObject;
                 var component = target.AddComponent(type);
-
+                
                 if (component is IRequireFieldFinder finder)
                     finder.Find();
             }
