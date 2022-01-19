@@ -15,6 +15,7 @@ using VContainer;
 using VContainer.Unity;
 using VFrame.Audio;
 using VFrame.Core;
+using VFrame.UI.Context;
 using VFrame.UI.External;
 using Object = UnityEngine.Object;
 
@@ -105,7 +106,10 @@ namespace VFrame.UI.Extension
             }
 
             instance.Configure(builder);
-            builder.RegisterEntryPoint<UISystem>().AsSelf().WithParameter(instance);
+            builder.RegisterEntryPoint<UISystem>()
+                .AsSelf()
+                .As<ISystemContext>()
+                .WithParameter(instance);
             builder.RegisterGroup<TransitionGroup>();
             builder.Register<IRouteFilter, TransitionRouteFilter>(Lifetime.Scoped);
             builder.Register<IRouteFilter, GroupRouteFilter>(Lifetime.Scoped);
@@ -231,6 +235,38 @@ namespace VFrame.UI.Extension
         }
 
         #endregion
+
+
+        public static void UseVirtualView(this IContainerBuilder builder, Action<VirtualViewBuilder> configuration)
+        {
+            configuration(new VirtualViewBuilder(builder));
+        }
+
+        public readonly struct VirtualViewBuilder
+        {
+            private readonly IContainerBuilder _builder;
+            public VirtualViewBuilder(IContainerBuilder builder) => _builder = builder;
+
+            public void Add<TView, TVirtualView>()
+                where TView : class, IView
+                where TVirtualView : VirtualView<TView>
+            {
+                _builder.Register<TVirtualView>(Lifetime.Scoped).AsSelf();
+            }
+
+            public void Add<TView, TVirtualView, TTransition>()
+                where TView : class, IView
+                where TVirtualView : VirtualView<TView>
+                where TTransition : class, ITransition<TVirtualView>
+            {
+                _builder.Register<TVirtualView>(Lifetime.Scoped).AsSelf();
+                _builder.RegisterTransition<TVirtualView, TTransition>();
+                _builder.Register<
+                    IViewMatcher<ITransition>,
+                    TransitionMatcher<TVirtualView, ITransition<TVirtualView>>
+                >(Lifetime.Scoped);
+            }
+        }
     }
 
     public class AnimationViewsBuilder : RegistrationBuilder

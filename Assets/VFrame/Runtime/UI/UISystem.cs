@@ -20,13 +20,26 @@ namespace VFrame.UI
 {
     public partial class UISystem : IDisposable, IInitializable, ISystemContext
     {
+        private static readonly Stack<LifetimeScope> Scopes = new Stack<LifetimeScope>();
+        public static UniTask Ready
+        {
+            get
+            {
+                if (_systemReadySource == null)
+                {
+                    throw new NullReferenceException();
+                }
+
+                return _systemReadySource.Task;
+            }
+        }
+
         private static UISystem _sharedInstance;
         private static UniTaskCompletionSource _systemReadySource = new UniTaskCompletionSource();
 
         // private static LifetimeScope _uiScope;
         private static IObjectResolver _container;
         private static RootCanvas _rootCanvas;
-
 #if UNITY_2021_2_OR_NEWER
         private static readonly Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>> RegisteredViews =
             new();
@@ -99,6 +112,8 @@ namespace VFrame.UI
 
         public static void Configure(LifetimeScope sceneScope, IContainerBuilder builder)
         {
+            Scopes.Push(sceneScope);
+
             var scene = sceneScope.gameObject.scene;
             if (!RegisteredViews.TryGetValue(scene, out var views)) return;
 
@@ -137,15 +152,18 @@ namespace VFrame.UI
 
         public static void Clear(LifetimeScope scope)
         {
-            var scene = scope.gameObject.scene;
-            // if (scene.isSubScene)
-            // {
-                // _container = scope.Parent.Container;
-            // }
+            Scopes.Pop();
 
-            _systemReadySource = new UniTaskCompletionSource();
-            _container = null;
-            _entryView = null;
+            if (Scopes.Any())
+            {
+                _container = Scopes.Peek().Container;
+            }
+            else
+            {
+                _systemReadySource = new UniTaskCompletionSource();
+                _container = null;
+                _entryView = null;
+            }
         }
 
         private static bool _isBlockingRegisterView = false;
@@ -341,7 +359,12 @@ namespace VFrame.UI
 
         bool ISystemContext.HasTransition(IView view)
         {
-            return _transitions.ContainsKey(view);
+            if (_transitions.ContainsKey(view))
+            {
+                return true;
+            }
+
+            return ConsumeMatcher(view, _transitions, out var transition);
         }
 
         IGroup ISystemContext.ResolveGroup<TGroup>()
