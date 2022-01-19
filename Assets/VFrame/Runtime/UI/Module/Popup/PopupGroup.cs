@@ -4,13 +4,14 @@ using Cysharp.Threading.Tasks;
 using VFrame.UI.Context;
 using VFrame.UI.View;
 using UnityEngine;
+using VFrame.UI.Extension;
 
 namespace VFrame.UI.Module.Popup
 {
     public class PopupGroup<TShadow> : IPopupGroup where TShadow : class, IView
     {
         private readonly Stack<IView> _views = new Stack<IView>();
-        // private TShadow _shadow;
+        private TShadow _shadow;
         private Transform _shadowParent;
 
         public async UniTask Push(ISystemContext context, IView view)
@@ -22,20 +23,17 @@ namespace VFrame.UI.Module.Popup
 
             if (_views.Contains(view)) return;
 
-            var shadow = context.ResolveView<TShadow>();
-            if (_shadowParent == null)
+            _shadow ??= context.ResolveView<TShadow>();
+            _shadowParent ??= _shadow.Rect.parent;
+
+            RepositionShadow(_shadow, view);
+
+            if (!_shadow.IsActive && _views.Count == 0)
             {
-                _shadowParent = shadow.Rect.parent;
+                context.ResolveAnimator(_shadow).In();
             }
 
-            RepositionShadow(shadow, view);
-            
-            if (!shadow.IsActive && _views.Count == 0)
-            {
-                context.ResolveAnimator(shadow).In();
-            }
-
-            shadow.Rect.SetAsLastSibling();
+            _shadow.Rect.SetAsLastSibling();
             view.Rect.SetAsLastSibling();
 
             if (context.View.TryPopManipulator(view, out var manipulator))
@@ -76,22 +74,17 @@ namespace VFrame.UI.Module.Popup
 
             if (_views.Count == 0)
             {
-                var shadow = context.Resolve<TShadow>();
-                ReturnShadow(shadow);
-
-                context.ResolveAnimator(shadow).Out();
+                ReturnShadow(_shadow);
+                context.ResolveAnimator(_shadow).Out();
                 await context.Command.Pop();
             }
             else
             {
-                var shadow = context.ResolveView<TShadow>();
                 var nextView = _views.Peek();
-                RepositionShadow(shadow, nextView);
-                // shadow.Rect.SetSiblingIndex(nextView.Rect.GetSiblingIndex() - 1);
-                shadow.Rect.SetAsLastSibling();
+                RepositionShadow(_shadow, nextView);
+                _shadow.Rect.SetAsLastSibling();
                 nextView.Rect.SetAsLastSibling();
 
-                
                 await context.Command.Pop();
             }
         }
@@ -99,7 +92,11 @@ namespace VFrame.UI.Module.Popup
         public void OnImmediatePop(IView view)
         {
             _views.Pop();
-            //TODO: ReturnShadow
+            if (!_views.Any())
+            {
+                ReturnShadow(_shadow);
+                _shadow.Hide();
+            }
         }
     }
 }
