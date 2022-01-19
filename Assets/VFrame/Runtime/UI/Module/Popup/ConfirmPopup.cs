@@ -16,6 +16,13 @@ namespace VFrame.UI.Module.Popup
 
         public override void OnEnter()
         {
+            if (confirmButton.onClick.GetPersistentEventCount() == 0)
+            {
+                confirmButton.onClick.AddListener(() =>
+                {
+                    UISystem.Back();
+                });
+            }
         }
 
         public override void OnExit()
