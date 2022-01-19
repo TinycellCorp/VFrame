@@ -64,7 +64,7 @@ namespace VFrame.UI.Command
                         async UniTask Restore()
                         {
                             await restoreAnimation.In(restoreView);
-                            restoreView.OnExit();
+                            restoreView.OnEnter();
                         }
 
                         RestoreTask = Restore();
