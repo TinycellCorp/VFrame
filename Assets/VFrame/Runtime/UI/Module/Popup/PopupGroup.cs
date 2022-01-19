@@ -65,6 +65,7 @@ namespace VFrame.UI.Module.Popup
             {
                 shadow.Rect.SetParent(_shadowParent);
                 shadow.Rect.anchoredPosition = Vector2.zero;
+                shadow.Rect.localScale = Vector3.one;
             }
         }
 
