@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using VContainer.Unity;
 using VFrame.UI.Animation;
 using VFrame.UI.Command.Route;
 using VFrame.UI.Group;
@@ -9,7 +11,6 @@ namespace VFrame.UI.Context
 {
     public interface ISystemContext
     {
-        UISystem System { get; }
         T Resolve<T>();
         T ResolveView<T>() where T : class, IView;
         IAnimation ResolveAnimation<T>() where T : class, IView;
@@ -30,5 +31,6 @@ namespace VFrame.UI.Context
         IGroupContext Group { get; }
         ICommandContext Command { get; }
         IAddressableContext Addressable { get; }
+
     }
 }

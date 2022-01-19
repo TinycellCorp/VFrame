@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using VFrame.UI.Animation;
 using VFrame.UI.Command;
 using VFrame.UI.Command.Route;
@@ -22,6 +21,7 @@ namespace VFrame.UI
     public partial class UISystem : IDisposable, IInitializable, ISystemContext
     {
         private static UISystem _sharedInstance;
+        private static UniTaskCompletionSource _systemReadySource = new UniTaskCompletionSource();
 
         // private static LifetimeScope _uiScope;
         private static IObjectResolver _container;
@@ -47,14 +47,11 @@ namespace VFrame.UI
         private readonly Dictionary<IView, ITransition> _transitions = new Dictionary<IView, ITransition>();
 #endif
 
-        UISystem ISystemContext.System => this;
-
         public UISystem(LifetimeScope rootScope, RootCanvas rootCanvas)
         {
             _sharedInstance = this;
             _rootScope = rootScope;
             _rootCanvas = rootCanvas;
-            SystemReadySource.TrySetResult();
         }
 
 
@@ -132,7 +129,7 @@ namespace VFrame.UI
             if (!isRoot)
             {
                 _container = resolver;
-                _containerReadyTask.TrySetResult();
+                _systemReadySource.TrySetResult();
             }
 
             PlayCommands();
@@ -141,10 +138,13 @@ namespace VFrame.UI
         public static void Clear(LifetimeScope scope)
         {
             var scene = scope.gameObject.scene;
+            // if (scene.isSubScene)
+            // {
+                // _container = scope.Parent.Container;
+            // }
 
-            _containerReadyTask = new UniTaskCompletionSource();
+            _systemReadySource = new UniTaskCompletionSource();
             _container = null;
-
             _entryView = null;
         }
 
@@ -454,7 +454,7 @@ namespace VFrame.UI
 
         private abstract class CacheGroupCommandBase : CacheCommandBase
         {
-            protected Dictionary<IView, IGroup> Groups(ISystemContext context) => context.System._groups;
+            protected Dictionary<IView, IGroup> Groups => _sharedInstance._groups;
 
             protected CacheGroupCommandBase(IView view) : base(view)
             {
@@ -472,7 +472,7 @@ namespace VFrame.UI
                 try
                 {
                     var group = Container.Resolve<IGroup<TView>>();
-                    var groups = Groups(context);
+                    var groups = Groups;
                     if (!groups.ContainsKey(View))
                     {
                         groups.Add(View, group);
@@ -499,7 +499,7 @@ namespace VFrame.UI
                 try
                 {
                     var group = Container.Resolve<TGroup>();
-                    var groups = Groups(context);
+                    var groups = Groups;
                     if (!groups.ContainsKey(View))
                     {
                         groups.Add(View, group);
@@ -517,7 +517,7 @@ namespace VFrame.UI
 
         private abstract class CacheAnimationCommandBase : CacheCommandBase
         {
-            protected Dictionary<IView, IAnimation> Animations(ISystemContext context) => context.System._animations;
+            protected Dictionary<IView, IAnimation> Animations => _sharedInstance._animations;
 
             protected CacheAnimationCommandBase(IView view) : base(view)
             {
@@ -535,7 +535,7 @@ namespace VFrame.UI
                 try
                 {
                     var animation = Container.Resolve<IAnimation<TView>>();
-                    var animations = Animations(context);
+                    var animations = Animations;
                     if (!animations.ContainsKey(View))
                     {
                         animations.Add(View, animation);
@@ -577,7 +577,7 @@ namespace VFrame.UI
                     }
                 }
 
-                var animations = Animations(context);
+                var animations = Animations;
                 if (!animations.ContainsKey(View) && animation != null)
                 {
                     animations.Add(View, animation);
@@ -589,7 +589,7 @@ namespace VFrame.UI
 
         private class CacheTransitionCommand<TView> : CacheCommandBase where TView : IView
         {
-            private Dictionary<IView, ITransition> Transitions(ISystemContext context) => context.System._transitions;
+            private Dictionary<IView, ITransition> Transitions => _sharedInstance._transitions;
 
             public CacheTransitionCommand(IView view) : base(view)
             {
@@ -600,7 +600,7 @@ namespace VFrame.UI
                 try
                 {
                     var transition = Container.Resolve<ITransition<TView>>();
-                    var transitions = Transitions(context);
+                    var transitions = Transitions;
                     if (!transitions.ContainsKey(View))
                     {
                         transitions.Add(View, transition);
@@ -617,7 +617,7 @@ namespace VFrame.UI
 
         private class CacheLayerCommand<TLayer> : CacheCommandBase where TLayer : class, ILayer
         {
-            private Dictionary<Type, ILayer> Layers(ISystemContext context) => context.System._layers;
+            private Dictionary<Type, ILayer> Layers => _sharedInstance._layers;
 
             public CacheLayerCommand(IView view) : base(view)
             {
@@ -626,7 +626,7 @@ namespace VFrame.UI
             public override UniTask Execute(ISystemContext context)
             {
                 var layerType = typeof(TLayer);
-                var layers = Layers(context);
+                var layers = Layers;
                 if (layers.TryGetValue(layerType, out var layer))
                 {
                     layer.In(View);
@@ -670,11 +670,25 @@ namespace VFrame.UI
             }
         }
 
-        public static async UniTask Show<TView>() where TView : class, IView
+        public static UniTask Show<TView>(bool isAwaitContainer = false) where TView : class, IView
         {
-            var system = _sharedInstance as ISystemContext;
-            var view = system.ResolveView<TView>();
-            await view.Show();
+            if (isAwaitContainer)
+            {
+                return UniTask.Create(async () =>
+                {
+                    await UniTask.WaitUntil(() => IsCommandPlayable);
+                    var view = (_sharedInstance as ISystemContext).ResolveView<TView>();
+                    await view.Show();
+                });
+            }
+
+            if (_container == null)
+            {
+                throw new OperationCanceledException("Container is Null");
+            }
+
+            var view = (_sharedInstance as ISystemContext).ResolveView<TView>();
+            return view.Show();
         }
 
         public static void Hide<TView>() where TView : class, IView

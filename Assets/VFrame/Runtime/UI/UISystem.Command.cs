@@ -7,8 +7,6 @@ using VFrame.UI.Command.Route;
 using VFrame.UI.Context;
 using VFrame.UI.View;
 using UnityEngine;
-using VContainer;
-using VContainer.Unity;
 
 namespace VFrame.UI
 {
@@ -17,23 +15,32 @@ namespace VFrame.UI
         private static bool _isBlocking = false;
         private static bool _isIgnoreBlocking = false;
 
-        private static readonly UniTaskCompletionSource SystemReadySource = new UniTaskCompletionSource();
-
-        private static UniTaskCompletionSource _containerReadyTask = new UniTaskCompletionSource();
-
         private static readonly Queue<ICommand> Commands = new Queue<ICommand>();
         private static UniTaskStatus _playCommandStatus = UniTaskStatus.Succeeded;
 
         private static bool IsBlocking => !_isIgnoreBlocking && _isBlocking;
 
         private static IView _entryView;
+
         public ICommandContext Command => this;
+
+        private static bool IsCommandPlayable
+        {
+            get
+            {
+                if (_playCommandStatus == UniTaskStatus.Pending) return false;
+                if (_systemReadySource.Task.Status == UniTaskStatus.Pending) return false;
+                return true;
+            }
+        }
 
         private static void PlayCommands()
         {
-            if (_playCommandStatus == UniTaskStatus.Pending) return;
-            if (SystemReadySource.Task.Status == UniTaskStatus.Pending) return;
-            if (_containerReadyTask.Task.Status == UniTaskStatus.Pending) return;
+            // if (_playCommandStatus == UniTaskStatus.Pending) return;
+            // if (SystemReadySource.Task.Status == UniTaskStatus.Pending) return;
+            // if (_containerReadyTask.Task.Status == UniTaskStatus.Pending) return;
+
+            if (!IsCommandPlayable) return;
 
             PlayCommandsAsync().Forget();
         }

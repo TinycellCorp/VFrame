@@ -7,9 +7,9 @@ namespace VFrame.Extension
 {
     public static class SceneEntryExtensions
     {
-        public static async UniTask UseAudioClip(this SceneEntry scene, string key)
+        public static async UniTask ReadyAudioClip(this SceneEntry scene, string key)
         {
-            await AudioSystem.Use(key);
+            await AudioSystem.Ready(key);
             new AudioClipDisposableHandler(key).AddTo(scene.GetCancellationTokenOnDestroy());
         }
 
@@ -24,7 +24,7 @@ namespace VFrame.Extension
 
             public void Dispose()
             {
-                AudioSystem.DisposeAudioClip(_key);
+                AudioSystem.Release(_key);
             }
         }
     }

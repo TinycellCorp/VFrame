@@ -36,8 +36,10 @@ namespace VFrame.UI.Module.Popup
                 if (view is ConfirmPopup<TView> target)
                 {
                     view.IsActive = false;
+                    //Content
                     target.contentText.text = _content;
 
+                    //Confirm
                     target.confirmButton.onClick.AddListener(Confirm);
                     target.confirmText.text = _confirm;
 

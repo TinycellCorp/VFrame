@@ -246,28 +246,25 @@ namespace VFrame.Audio
             return _sharedInstance.LoadAudioDataAsync(key);
         }
 
-        public static async UniTask Use(string key)
+        public static async UniTask Ready(string key)
         {
             if (string.IsNullOrEmpty(key)) return;
             await _sharedInstance.Preload(key);
             await _sharedInstance.LoadAudioDataAsync(key);
         }
 
-        public static void DisposeAudioClip(string key)
+        public static void Release(string key)
         {
             if (string.IsNullOrEmpty(key)) return;
             var references = _sharedInstance._keyToClipReferences;
-            if (references.TryGetValue(key, out var reference))
+            if (references.TryGetValue(key, out var reference) && reference.TryGetAsset(out var asset))
             {
-                if (reference.TryGetAsset(out var asset))
+                foreach (var source in _sharedInstance._mixerNameToAudioSources.Values)
                 {
-                    foreach (var source in _sharedInstance._mixerNameToAudioSources.Values)
+                    if (source != null && source.clip == asset)
                     {
-                        if (source != null && source.clip == asset)
-                        {
-                            source.Stop();
-                            source.clip = null;
-                        }
+                        source.Stop();
+                        source.clip = null;
                     }
                 }
 
