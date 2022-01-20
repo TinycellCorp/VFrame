@@ -1,19 +1,29 @@
-﻿using VFrame.UI.Blackboard;
+﻿using System;
+using VFrame.UI.Blackboard;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using VFrame.Core;
 
 namespace VFrame.UI
 {
     [RequireComponent(typeof(Canvas))]
     public class RootCanvas : MonoBehaviour
     {
-        [SerializeField] private BlackboardAsset blackboardAsset;
- 
+        // [SerializeField] private BlackboardAsset blackboardAsset;
+
         public void Configure(IContainerBuilder builder)
         {
-            builder.RegisterEntryPoint<RootBlackboard>().AsSelf();
-            builder.RegisterInstance(blackboardAsset);
+            if (VFrameSettings.Instance.BlackboardAsset != null)
+            {
+                builder.RegisterInstance(VFrameSettings.Instance.BlackboardAsset);
+                builder.RegisterEntryPoint<RootBlackboard>().AsSelf();
+            }
+            else
+            {
+                //todo: register safety
+                throw new ArgumentNullException($"{nameof(BlackboardAsset)}");
+            }
 
             UISystem.RootConfigure(gameObject.scene, builder);
 

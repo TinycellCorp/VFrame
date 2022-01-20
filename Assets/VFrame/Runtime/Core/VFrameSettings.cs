@@ -2,6 +2,7 @@
 using UnityEngine;
 using VFrame.Audio;
 using VFrame.UI;
+using VFrame.UI.Blackboard;
 
 namespace VFrame.Core
 {
@@ -11,6 +12,7 @@ namespace VFrame.Core
         public static VFrameSettings Instance { get; private set; }
         
         public RootCanvas RootCanvas;
+        public BlackboardAsset BlackboardAsset;
         public AudioGroup[] AudioGroups;
 
 #if UNITY_EDITOR
