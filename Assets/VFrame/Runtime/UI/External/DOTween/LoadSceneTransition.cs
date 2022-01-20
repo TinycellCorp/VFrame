@@ -28,7 +28,9 @@ namespace VFrame.UI.External
                 operation.Active();
             }
 
-            UISystem.WaitUntilNextEntry().ContinueWith(() => { fade.Out(); });
+            await UISystem.Ready;
+            fade.Out();
+            // UISystem.WaitUntilNextEntry().ContinueWith(() => { fade.Out(); });
         }
 
         public UniTask Out(ISystemContext context, ITransitionJob job) => UniTask.CompletedTask;

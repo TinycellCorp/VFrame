@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using TMPro;
 using VFrame.UI.Layer;
 using VFrame.UI.Module.Popup;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace VFrame.Editor.UI
@@ -100,6 +104,13 @@ namespace VFrame.Editor.UI
         static void CreateDialogPopup() => CreateInstance<Canvas>("Dialog");
 
 
+        private static readonly Dictionary<string, Action<Component>> RequireFieldFinder =
+            new Dictionary<string, Action<Component>>
+            {
+                {"ConfirmPopup", FindConfirmFields},
+                {"DialogPopup", FindDialogFields}
+            };
+
         [MenuItem(MenuPath + "/AutoAttach")]
         static void AutoAttach()
         {
@@ -107,9 +118,60 @@ namespace VFrame.Editor.UI
             {
                 var target = Selection.activeGameObject;
                 var component = target.AddComponent(type);
-                
-                if (component is IRequireFieldFinder finder)
-                    finder.Find();
+
+                if (type.BaseType != null)
+                {
+                    var name = type.BaseType.Name;
+                    foreach (var pair in RequireFieldFinder)
+                    {
+                        if (name.Contains(pair.Key))
+                        {
+                            pair.Value(component);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void FindConfirmFields(Component component)
+        {
+            var transform = component.transform;
+            FindFields(component, new[]
+            {
+                (transform.Find("Content"), "contentText", typeof(TextMeshProUGUI)),
+
+                (transform.Find("Button"), "confirmButton", typeof(Button)),
+                (transform.Find("Button").GetChild(0), "confirmText", typeof(TextMeshProUGUI)),
+            });
+        }
+
+        private static void FindDialogFields(Component component)
+        {
+            var transform = component.transform;
+            FindFields(component, new[]
+            {
+                (transform.Find("Content"), "contentText", typeof(TextMeshProUGUI)),
+
+                (transform.Find("Positive"), "positiveButton", typeof(Button)),
+                (transform.Find("Positive").GetChild(0), "positiveText", typeof(TextMeshProUGUI)),
+
+                (transform.Find("Negative"), "negativeButton", typeof(Button)),
+                (transform.Find("Negative").GetChild(0), "negativeText", typeof(TextMeshProUGUI)),
+            });
+        }
+
+        private static void FindFields(Component component,
+            (Transform target, string fieldName, Type componentType)[] requireFields)
+        {
+            var type = component.GetType().BaseType;
+            if (type == null) return;
+
+            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            foreach (var requireField in requireFields)
+            {
+                var findComponent = requireField.target.GetComponent(requireField.componentType);
+                type.GetField(requireField.fieldName, flags)?.SetValue(component, findComponent);
             }
         }
 

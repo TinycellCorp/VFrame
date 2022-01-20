@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace VFrame.UI.Module.Popup
 {
-    public abstract class ConfirmPopup<TView> : PopupView<TView>, IRequireFieldFinder where TView : IView
+    public abstract class ConfirmPopup<TView> : PopupView<TView> where TView : IView
     {
         [SerializeField] protected TextMeshProUGUI contentText;
 
@@ -18,10 +18,7 @@ namespace VFrame.UI.Module.Popup
         {
             if (confirmButton.onClick.GetPersistentEventCount() == 0)
             {
-                confirmButton.onClick.AddListener(() =>
-                {
-                    UISystem.Back();
-                });
+                confirmButton.onClick.AddListener(() => { UISystem.Back(); });
             }
         }
 
@@ -60,14 +57,5 @@ namespace VFrame.UI.Module.Popup
             protected abstract void Confirm();
         }
 
-
-        void IRequireFieldFinder.Find()
-        {
-            contentText = transform.Find("Content")?.GetComponent<TextMeshProUGUI>();
-
-            confirmButton = transform.Find("Button")?.GetComponent<Button>();
-            if (confirmButton != null)
-                confirmText = confirmButton.GetComponentInChildren<TextMeshProUGUI>();
-        }
     }
 }

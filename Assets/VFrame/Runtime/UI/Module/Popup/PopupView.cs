@@ -3,11 +3,6 @@ using VFrame.UI.View;
 
 namespace VFrame.UI.Module.Popup
 {
-    public interface IRequireFieldFinder
-    {
-        void Find();
-    }
-
     public interface IPopupView : IView
     {
     }

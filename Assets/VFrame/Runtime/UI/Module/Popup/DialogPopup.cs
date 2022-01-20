@@ -14,7 +14,7 @@ namespace VFrame.UI.Module.Popup
     }
 
 
-    public abstract class DialogPopup<TView> : PopupView<TView>, IRequireFieldFinder where TView : IView
+    public abstract class DialogPopup<TView> : PopupView<TView> where TView : IView
     {
         [SerializeField] protected TextMeshProUGUI contentText;
         [SerializeField] protected Button positiveButton;
@@ -63,21 +63,6 @@ namespace VFrame.UI.Module.Popup
             protected abstract UniTask PostReady(DialogPopup<TView> view);
             public abstract void Positive();
             public abstract void Negative();
-        }
-
-        void IRequireFieldFinder.Find()
-        {
-            contentText = transform.Find("Content")?.GetComponent<TextMeshProUGUI>();
-
-            positiveButton = transform.Find("Positive")?.GetComponent<Button>();
-            if (positiveButton != null)
-                positiveText = positiveButton.GetComponentInChildren<TextMeshProUGUI>();
-
-            negativeButton = transform.Find("Negative")?.GetComponent<Button>();
-            if (negativeButton != null)
-                negativeText = negativeButton.GetComponentInChildren<TextMeshProUGUI>();
-            
-            
         }
     }
 }
