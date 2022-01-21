@@ -28,19 +28,22 @@ namespace VFrame.UI.Module.Popup
 
             RepositionShadow(_shadow, view);
 
+            var tasks = (UniTask.CompletedTask, UniTask.CompletedTask);
             if (!_shadow.IsActive && _views.Count == 0)
             {
-                context.ResolveAnimator(_shadow).In();
+                tasks.Item1 = context.ResolveAnimator(_shadow).In();
             }
 
             if (context.View.TryPopManipulator(view, out var manipulator))
             {
-                await context.Command.Push(view, manipulator);
+                tasks.Item2 = context.Command.Push(view, manipulator);
             }
             else
             {
-                await context.Command.Push(view);
+                tasks.Item2 = context.Command.Push(view);
             }
+
+            await tasks;
 
             _views.Push(view);
         }
@@ -53,6 +56,7 @@ namespace VFrame.UI.Module.Popup
                 shadow.Rect.anchoredPosition = Vector2.zero;
                 shadow.Rect.localScale = Vector3.one;
             }
+
             shadow.Rect.SetAsLastSibling();
             view.Rect.SetAsLastSibling();
         }
