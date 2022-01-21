@@ -48,29 +48,6 @@ namespace VFrame.UI.Module.Popup
             _views.Push(view);
         }
 
-        private void RepositionShadow(TShadow shadow, IView view)
-        {
-            if (shadow.Rect.parent != view.Rect.parent)
-            {
-                shadow.Rect.SetParent(view.Rect.parent);
-                shadow.Rect.anchoredPosition = Vector2.zero;
-                shadow.Rect.localScale = Vector3.one;
-            }
-
-            shadow.Rect.SetAsLastSibling();
-            view.Rect.SetAsLastSibling();
-        }
-
-        private void ReturnShadow(TShadow shadow)
-        {
-            if (shadow.Rect.parent != _shadowParent)
-            {
-                shadow.Rect.SetParent(_shadowParent);
-                shadow.Rect.anchoredPosition = Vector2.zero;
-                shadow.Rect.localScale = Vector3.one;
-            }
-        }
-
         public async UniTask Pop(ISystemContext context)
         {
             if (_views.Any()) _views.Pop();
@@ -106,5 +83,29 @@ namespace VFrame.UI.Module.Popup
                 _shadow.Hide();
             }
         }
+        
+        private void RepositionShadow(TShadow shadow, IView view)
+        {
+            if (shadow.Rect.parent != view.Rect.parent)
+            {
+                shadow.Rect.SetParent(view.Rect.parent);
+                shadow.Rect.anchoredPosition = Vector2.zero;
+                shadow.Rect.localScale = Vector3.one;
+            }
+
+            shadow.Rect.SetAsLastSibling();
+            view.Rect.SetAsLastSibling();
+        }
+
+        private void ReturnShadow(TShadow shadow)
+        {
+            if (shadow.Rect.parent != _shadowParent)
+            {
+                shadow.Rect.SetParent(_shadowParent);
+                shadow.Rect.anchoredPosition = Vector2.zero;
+                shadow.Rect.localScale = Vector3.one;
+            }
+        }
+
     }
 }
