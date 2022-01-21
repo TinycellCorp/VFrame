@@ -99,17 +99,17 @@ namespace VFrame.UI.Extension
 
             var rootCanvasPrefab = VFrameSettings.Instance.RootCanvas;
 
-            RootCanvas instance;
-            using (rootCanvasPrefab.InstantiateBefore(out instance))
+            RootCanvas rootCanvas;
+            using (rootCanvasPrefab.InstantiateBefore(out rootCanvas))
             {
-                Object.DontDestroyOnLoad(instance.gameObject);
+                Object.DontDestroyOnLoad(rootCanvas.gameObject);
             }
 
-            instance.Configure(builder);
+            rootCanvas.Configure(builder);
             builder.RegisterEntryPoint<UISystem>()
                 .AsSelf()
-                .As<ISystemContext>()
-                .WithParameter(instance);
+                .As<ISystemContext>()//Using VirtualView
+                .WithParameter(rootCanvas);
             builder.RegisterGroup<TransitionGroup>();
             builder.Register<IRouteFilter, TransitionRouteFilter>(Lifetime.Scoped);
             builder.Register<IRouteFilter, GroupRouteFilter>(Lifetime.Scoped);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VFrame.UI.Command;
 using VFrame.UI.Context;
+using VFrame.UI.Extension;
 using VFrame.UI.View;
 
 namespace VFrame.UI
@@ -88,11 +89,10 @@ namespace VFrame.UI
 
         void IViewContext.ImmediatePop()
         {
-            if (_views.Any())
+            if ((this as IViewContext).SafetyAny())
             {
                 var view = _views.Pop();
-                view.IsActive = false;
-                view.OnExit();
+                view.Hide();
                 if (_groups.TryGetValue(view, out var @group))
                 {
                     group.OnImmediatePop(view);

@@ -33,9 +33,6 @@ namespace VFrame.UI.Module.Popup
                 context.ResolveAnimator(_shadow).In();
             }
 
-            _shadow.Rect.SetAsLastSibling();
-            view.Rect.SetAsLastSibling();
-
             if (context.View.TryPopManipulator(view, out var manipulator))
             {
                 await context.Command.Push(view, manipulator);
@@ -56,6 +53,8 @@ namespace VFrame.UI.Module.Popup
                 shadow.Rect.anchoredPosition = Vector2.zero;
                 shadow.Rect.localScale = Vector3.one;
             }
+            shadow.Rect.SetAsLastSibling();
+            view.Rect.SetAsLastSibling();
         }
 
         private void ReturnShadow(TShadow shadow)
@@ -75,16 +74,16 @@ namespace VFrame.UI.Module.Popup
             if (_views.Count == 0)
             {
                 ReturnShadow(_shadow);
-                context.ResolveAnimator(_shadow).Out();
-                await context.Command.Pop();
+
+                await (
+                    context.ResolveAnimator(_shadow).Out(),
+                    context.Command.Pop()
+                );
             }
             else
             {
                 var nextView = _views.Peek();
                 RepositionShadow(_shadow, nextView);
-                _shadow.Rect.SetAsLastSibling();
-                nextView.Rect.SetAsLastSibling();
-
                 await context.Command.Pop();
             }
         }
@@ -92,7 +91,12 @@ namespace VFrame.UI.Module.Popup
         public void OnImmediatePop(IView view)
         {
             _views.Pop();
-            if (!_views.Any())
+            if (_views.Any())
+            {
+                var nextView = _views.Peek();
+                RepositionShadow(_shadow, nextView);
+            }
+            else
             {
                 ReturnShadow(_shadow);
                 _shadow.Hide();
