@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using VFrame.UI.Animation;
 using VFrame.UI.Context;
@@ -36,7 +37,7 @@ namespace VFrame.UI.Command
             var inAnimation = GetNextAnimation(context);
             var outAnimation = context.ResolveAnimation(prev);
             view.IsActive = true;
-            await UniTask.WhenAll(
+            await (
                 outAnimation.Out(prev),
                 inAnimation.In(view)
             );

@@ -36,10 +36,6 @@ namespace VFrame.UI
 
         private static void PlayCommands()
         {
-            // if (_playCommandStatus == UniTaskStatus.Pending) return;
-            // if (SystemReadySource.Task.Status == UniTaskStatus.Pending) return;
-            // if (_containerReadyTask.Task.Status == UniTaskStatus.Pending) return;
-
             if (!IsCommandPlayable) return;
 
             PlayCommandsAsync().Forget();
@@ -52,9 +48,6 @@ namespace VFrame.UI
 
             using (EnableBlocking())
             {
-                // if (_sharedInstance == null) await SystemReadySource.Task;
-                // if (_container == null) await _containerReadyTask.Task;
-
                 await UniTask.NextFrame(PlayerLoopTiming.PostLateUpdate);
 
                 while (Commands.Any())
@@ -74,10 +67,7 @@ namespace VFrame.UI
         private static void EnqueueCommand(ICommand command)
         {
             Commands.Enqueue(command);
-
             PlayCommands();
-            // if (_playCommandStatus == UniTaskStatus.Pending) return;
-            // PlayCommandsAsync().Forget();
         }
 
         private static void ExecuteCacheCommand(ICommand command)
