@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using UnityEngine;
 using VFrame.UI.Animation;
 using VFrame.UI.View;
 
@@ -31,6 +32,33 @@ namespace VFrame.UI.Extension
         {
             view.IsActive = false;
             view.OnExit();
+        }
+
+        public static float GetWidth(this IView view)
+        {
+            return view.Rect.rect.width;
+        }
+
+        public static float GetHeight(this IView view)
+        {
+            return view.Rect.rect.height;
+        }
+
+        public static void SetPosition(this IView view, float x)
+        {
+            var pos = view.Rect.anchoredPosition;
+            pos.x = x;
+            view.Rect.anchoredPosition = pos;
+        }
+
+        public static void SetPosition(this IView view, Vector2 pos)
+        {
+            view.Rect.anchoredPosition = pos;
+        }
+
+        public static Vector2 GetPosition(this IView view)
+        {
+            return view.Rect.anchoredPosition;
         }
     }
 }

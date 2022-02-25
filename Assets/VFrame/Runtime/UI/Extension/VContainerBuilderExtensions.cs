@@ -17,6 +17,8 @@ using VFrame.Audio;
 using VFrame.Core;
 using VFrame.UI.Context;
 using VFrame.UI.External;
+using VFrame.UI.Module.Message;
+using VFrame.UI.Pool;
 using Object = UnityEngine.Object;
 
 namespace VFrame.UI.Extension
@@ -108,7 +110,7 @@ namespace VFrame.UI.Extension
             rootCanvas.Configure(builder);
             builder.RegisterEntryPoint<UISystem>()
                 .AsSelf()
-                .As<ISystemContext>()//Using VirtualView
+                .As<ISystemContext>() //Using VirtualView
                 .WithParameter(rootCanvas);
             builder.RegisterGroup<TransitionGroup>();
             builder.Register<IRouteFilter, TransitionRouteFilter>(Lifetime.Scoped);
@@ -173,7 +175,7 @@ namespace VFrame.UI.Extension
             configuration(new UISystemModuleBuilder(builder));
         }
 
-        public readonly struct UISystemModuleBuilder
+        public readonly partial struct UISystemModuleBuilder
         {
             private readonly IContainerBuilder _builder;
             public UISystemModuleBuilder(IContainerBuilder builder) => _builder = builder;
@@ -233,6 +235,30 @@ namespace VFrame.UI.Extension
                 _builder.Register<IViewMatcher<IGroup>, GroupMatcher<TChild, TabGroup<TParent>>>(Lifetime.Scoped);
             }
         }
+
+        #region Message
+
+        public readonly partial struct UISystemModuleBuilder
+        {
+            public void UseMessage<TView, TAnimation>(int limit)
+                where TView : ComponentView, IMessageView
+                where TAnimation : IAnimation<TView>
+            {
+                if (limit <= 0)
+                {
+                    throw new ArgumentException(limit.ToString());
+                }
+
+                _builder.Register<MessageGroup<TView>.Config>(Lifetime.Singleton)
+                    .AsSelf()
+                    .WithParameter(limit);
+                _builder.RegisterGroup<MessageGroup<TView>>();
+                _builder.RegisterViewAnimation<TView, TAnimation>();
+                _builder.Register<IViewPool<TView>, ComponentViewPool<TView>>(Lifetime.Singleton);
+            }
+        }
+
+        #endregion
 
         #endregion
 

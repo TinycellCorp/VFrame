@@ -14,7 +14,6 @@ namespace VFrame.UI.External
             float duration,
             bool snapping = false)
         {
-            
             TweenerCore<Vector3, Vector3, VectorOptions> t = DOTween.To(
                 (DOGetter<Vector3>) (() => target.anchoredPosition),
                 (DOSetter<Vector3>) (x => target.anchoredPosition = x), new Vector3(endValue, 0.0f, 0.0f), duration);
@@ -47,6 +46,17 @@ namespace VFrame.UI.External
         )
         {
             return target.Rect.DOAnchoredMoveY(endValue, duration, snapping);
+        }
+
+        public static TweenerCore<Vector2, Vector2, VectorOptions> DOAnchoredMove(
+            this IView target, Vector2 endValue, float duration, bool snapping = false
+        )
+        {
+            TweenerCore<Vector2, Vector2, VectorOptions> t = DOTween.To(
+                (DOGetter<Vector2>) (() => target.Rect.anchoredPosition),
+                (DOSetter<Vector2>) (p => target.Rect.anchoredPosition = p), endValue, duration);
+            t.SetOptions(snapping).SetTarget<Tweener>((object) target);
+            return t;
         }
 
         public static TweenerCore<float, float, FloatOptions> DOFade(

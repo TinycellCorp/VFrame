@@ -19,7 +19,7 @@ namespace VFrame.UI.Animation
 
         public UniTask In() => _view.In(_animation);
         public UniTask Out() => _view.Out(_animation);
-
+        
         public async UniTask<ScopeAnimator> Scope()
         {
             await In();
@@ -36,5 +36,6 @@ namespace VFrame.UI.Animation
                 return _animator.Out();
             }
         }
+
     }
 }

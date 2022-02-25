@@ -221,7 +221,7 @@ namespace VFrame.UI
         }
 
 
-        private static void Register<TView, TGroup>(ComponentView<TView> view)
+        public static void Register<TView, TGroup>(ComponentView<TView> view)
             where TView : IView
             where TGroup : class, IGroup
         {

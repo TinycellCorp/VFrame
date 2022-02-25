@@ -11,7 +11,7 @@ namespace VFrame.UI.Module.Toast
     {
     }
 
-    public abstract class ToastAnimationBase : CancelableAnimation, IAnimation
+    public abstract class ToastAnimationBase : CancelableAnimation
     {
         protected sealed override async UniTask In(IView view, CancellationToken token)
         {

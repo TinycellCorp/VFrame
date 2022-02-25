@@ -62,8 +62,8 @@ namespace VFrame.UI.View
                     Rect.anchoredPosition = _initPosition;
                 }
 
-                CanvasGroup.interactable = value;
-                CanvasGroup.blocksRaycasts = value;
+                if (_initInteractable) CanvasGroup.interactable = value;
+                if (_initBlockRaycasts) CanvasGroup.blocksRaycasts = value;
             }
         }
 
@@ -74,6 +74,8 @@ namespace VFrame.UI.View
         }
 
         private Vector2 _initPosition;
+        private bool _initInteractable;
+        private bool _initBlockRaycasts;
 
         protected virtual void Awake()
         {
@@ -84,6 +86,8 @@ namespace VFrame.UI.View
         protected void Init()
         {
             _initPosition = Rect.anchoredPosition;
+            _initInteractable = CanvasGroup.interactable;
+            _initBlockRaycasts = CanvasGroup.blocksRaycasts;
             IsActive = _isActive;
         }
 
