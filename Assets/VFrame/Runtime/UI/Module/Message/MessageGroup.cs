@@ -4,31 +4,53 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using VFrame.UI.Animation;
+using VContainer.Unity;
 using VFrame.UI.Command;
 using VFrame.UI.Context;
 using VFrame.UI.Extension;
 using VFrame.UI.Group;
 using VFrame.UI.Pool;
 using VFrame.UI.View;
-using Object = System.Object;
 
 namespace VFrame.UI.Module.Message
 {
-    public class MessageGroup<TView> : IGroup where TView : class, IMessageView
+    public class MessageGroup
     {
+        protected static Action Cancellations;
+
+        public static void CancelAll()
+        {
+            Cancellations?.Invoke();
+        }
+    }
+
+    public class MessageGroup<TView> : MessageGroup, IGroup where TView : class, IMessageView
+    {
+        private static UniTaskStatus _playStatus = UniTaskStatus.Succeeded;
+
+        public static void Cancel()
+        {
+            if (_playStatus == UniTaskStatus.Pending)
+            {
+                _playStatus = UniTaskStatus.Canceled;
+            }
+        }
+
         private readonly Config _config;
         private readonly IViewPool<TView> _pool;
 
         private readonly Queue<IView> _views = new Queue<IView>();
         private CancellationTokenSource _pendingTokenSource;
 
-        private readonly Channel<AsyncLazy> _channel = Channel.CreateSingleConsumerUnbounded<AsyncLazy>();
+        // private readonly Channel<AsyncLazy> _channel = Channel.CreateSingleConsumerUnbounded<AsyncLazy>();
+
+        private readonly Queue<AsyncLazy> _lazies = new Queue<AsyncLazy>();
 
         public MessageGroup(Config config, IViewPool<TView> pool)
         {
             _config = config;
             _pool = pool;
+            Cancellations += Cancel;
         }
 
         public UniTask Push(ISystemContext context, IView view)
@@ -42,25 +64,30 @@ namespace VFrame.UI.Module.Message
             if (context.View.TryPopManipulator(view, out var manipulator))
             {
                 var task = UniTask.Lazy(() => InternalPush(animation, view, manipulator));
-                _channel.Writer.TryWrite(task);
+                // _channel.Writer.TryWrite(task);
+                _lazies.Enqueue(task);
             }
 
             PlayChannel().Forget();
             return UniTask.CompletedTask;
         }
 
-        private UniTaskStatus _playChannelStatus = UniTaskStatus.Succeeded;
-
         private async UniTaskVoid PlayChannel()
         {
-            if (_playChannelStatus == UniTaskStatus.Pending) return;
-            _playChannelStatus = UniTaskStatus.Pending;
-            while (_channel.Reader.TryRead(out var task))
+            if (_playStatus != UniTaskStatus.Succeeded) return;
+            _playStatus = UniTaskStatus.Pending;
+
+            // while (_channel.Reader.TryRead(out var task) && !_playToken.Token.IsCancellationRequested)
+            // {
+            //     await task;
+            // }
+            while (_lazies.Any() && _playStatus != UniTaskStatus.Canceled)
             {
-                await task;
+                await _lazies.Dequeue();
             }
 
-            _playChannelStatus = UniTaskStatus.Succeeded;
+            _lazies.Clear();
+            _playStatus = UniTaskStatus.Succeeded;
         }
 
         private async UniTask InternalPush(IMessageAnimation animation, IView source, IManipulator manipulator)

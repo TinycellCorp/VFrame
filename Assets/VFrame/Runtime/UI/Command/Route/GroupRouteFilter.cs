@@ -10,6 +10,7 @@ namespace VFrame.UI.Command.Route
         {
             if (!context.TryResolveGroup(view, out var group)) return false;
 
+            //todo: main stream is await or sub stream is non await
             await @group.Push(context, view);
             return true;
         }
