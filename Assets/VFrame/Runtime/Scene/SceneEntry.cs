@@ -12,6 +12,11 @@ using VContainer.Unity;
 
 namespace VFrame.Scene
 {
+    public interface IPostProcessPreload
+    {
+        UniTask OnPostProcessPreload();
+    }
+
     public abstract class SceneEntry : IInitializable, IAsyncStartable, IDisposable
     {
         private readonly IObjectResolver _resolver;
@@ -32,42 +37,62 @@ namespace VFrame.Scene
 
         public async UniTask StartAsync(CancellationToken cancellation)
         {
-            var prefabKeys = _resolver.Resolve<IReadOnlyList<IPreloadPrefabReservable>>();
-            foreach (var reserved in prefabKeys)
+            await PreloadPrefabs(_resolver, Assets);
+            await PreloadPrefabVariants(_resolver, Assets);
+            await _preloader.PreloadAsync(Assets);
+
+            var processes = _resolver.Resolve<IReadOnlyList<IPostProcessPreload>>();
+            foreach (var process in processes)
             {
-                var pool = _resolver.Resolve(reserved.PoolType);
-                if (pool is ILazyComponentPoolInitializable initializable)
+                await process.OnPostProcessPreload();
+            }
+
+            await PostStartAsync(cancellation);
+
+
+            #region Local Methods
+
+            async UniTask PreloadPrefabs(IObjectResolver resolver, AssetCache assets)
+            {
+                var prefabKeys = resolver.Resolve<IReadOnlyList<IPreloadPrefabReservable>>();
+                foreach (var reserved in prefabKeys)
                 {
-                    var prefab = await Addressables.LoadAssetAsync<GameObject>(reserved.BundleKey).Task.AsUniTask();
-                    Assets.RegisterPrefab(reserved.BundleKey, prefab);
-                    initializable.Initialize(prefab);
+                    var pool = resolver.Resolve(reserved.PoolType);
+                    if (pool is ILazyComponentPoolInitializable initializable)
+                    {
+                        var prefab = await Addressables.LoadAssetAsync<GameObject>(reserved.BundleKey).Task.AsUniTask();
+                        assets.RegisterPrefab(reserved.BundleKey, prefab);
+                        initializable.Initialize(prefab);
+                    }
                 }
             }
 
-            var prefabVariantKeys = _resolver.Resolve<IReadOnlyList<IPreloadPrefabVariantReservable>>();
-            foreach (var reserved in prefabVariantKeys)
+            async UniTask PreloadPrefabVariants(IObjectResolver resolver, AssetCache assets)
             {
-                var pool = _resolver.Resolve(reserved.PoolType);
-                if (pool is ILazyVariantComponentPoolInitializable initializable)
+                var prefabVariantKeys = resolver.Resolve<IReadOnlyList<IPreloadPrefabVariantReservable>>();
+                foreach (var reserved in prefabVariantKeys)
                 {
-                    foreach (var key in reserved.BundleKeys)
-                    {
-                        var prefab = await Addressables.LoadAssetAsync<GameObject>(key).Task.AsUniTask();
-                        Assets.RegisterPrefab(key, prefab);
-                    }
-
-                    initializable.Initialize(builder =>
+                    var pool = resolver.Resolve(reserved.PoolType);
+                    if (pool is ILazyVariantComponentPoolInitializable initializable)
                     {
                         foreach (var key in reserved.BundleKeys)
                         {
-                            builder.Add(key, Assets.GetPrefab(key));
+                            var prefab = await Addressables.LoadAssetAsync<GameObject>(key).Task.AsUniTask();
+                            assets.RegisterPrefab(key, prefab);
                         }
-                    });
+
+                        initializable.Initialize(builder =>
+                        {
+                            foreach (var key in reserved.BundleKeys)
+                            {
+                                builder.Add(key, assets.GetPrefab(key));
+                            }
+                        });
+                    }
                 }
             }
 
-            await _preloader.PreloadAsync(Assets);
-            await PostStartAsync(cancellation);
+            #endregion
         }
 
         protected virtual UniTask PostStartAsync(CancellationToken cancellation)
@@ -75,7 +100,7 @@ namespace VFrame.Scene
             return UniTask.CompletedTask;
         }
 
-        
+
         public CancellationToken GetCancellationTokenOnDestroy()
         {
             var scope = _resolver.Resolve<LifetimeScope>();
