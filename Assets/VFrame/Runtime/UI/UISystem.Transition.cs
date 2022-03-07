@@ -33,7 +33,7 @@ namespace VFrame.UI
             {
                 while (_context.View.Any())
                 {
-                    _context.View.ImmediatePop();
+                    _context.View.ImmediatePop(true);
                 }
 
                 return UniTask.CompletedTask;

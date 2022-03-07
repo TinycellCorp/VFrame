@@ -17,7 +17,7 @@ namespace VFrame.UI.Context
         void PutManipulator(IView view, IManipulator manipulator);
         bool TryPopManipulator(IView view, out IManipulator manipulator);
 
-        void ImmediatePop();
+        void ImmediatePop(bool clearAll = false);
         void ClearStack(); //TODO: Transition Checkpoint
 
         

@@ -87,9 +87,9 @@ namespace VFrame.UI
             return has;
         }
 
-        void IViewContext.ImmediatePop()
+        void IViewContext.ImmediatePop(bool clearAll)
         {
-            if ((this as IViewContext).SafetyAny())
+            if (clearAll ? (this as IViewContext).Any() : (this as IViewContext).SafetyAny())
             {
                 var view = _views.Pop();
                 view.Hide();
