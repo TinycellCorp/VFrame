@@ -67,14 +67,6 @@ namespace VFrame.UI
             return _views.Contains(view);
         }
 
-        void IViewContext.ClearStack()
-        {
-            while (View.SafetyAny())
-            {
-                View.ImmediatePop();
-            }
-        }
-
         void IViewContext.PutManipulator(IView view, IManipulator manipulator)
         {
             _manipulators[view] = manipulator;
@@ -87,16 +79,32 @@ namespace VFrame.UI
             return has;
         }
 
-        void IViewContext.ImmediatePop(bool clearAll)
+        void IViewContext.ImmediatePop()
         {
-            if (clearAll ? (this as IViewContext).Any() : (this as IViewContext).SafetyAny())
+            var view = _views.Pop();
+            view.Hide();
+            if (_groups.TryGetValue(view, out var @group))
             {
-                var view = _views.Pop();
-                view.Hide();
-                if (_groups.TryGetValue(view, out var @group))
-                {
-                    group.OnImmediatePop(view);
-                }
+                group.OnImmediatePop(view);
+            }
+        }
+    }
+
+    public static class ViewContextExtensions
+    {
+        public static void ClearAll(this IViewContext view)
+        {
+            while (view.Any())
+            {
+                view.ImmediatePop();
+            }
+        }
+
+        public static void ClearSafe(this IViewContext view)
+        {
+            while (view.SafetyAny())
+            {
+                view.ImmediatePop();
             }
         }
     }

@@ -57,7 +57,7 @@ namespace VFrame.UI.Command
             {
                 await _nextView.Ready();
 
-                _context.View.ClearStack();
+                _context.View.ClearSafe();
 
                 if (_context.View.Any())
                 {

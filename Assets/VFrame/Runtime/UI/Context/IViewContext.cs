@@ -13,13 +13,10 @@ namespace VFrame.UI.Context
         bool SafetyAny();
         bool Contains(IView view);
 
-
         void PutManipulator(IView view, IManipulator manipulator);
         bool TryPopManipulator(IView view, out IManipulator manipulator);
 
-        void ImmediatePop(bool clearAll = false);
-        void ClearStack(); //TODO: Transition Checkpoint
-
+        void ImmediatePop();
         
     }
 }
