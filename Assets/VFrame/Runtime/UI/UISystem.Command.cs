@@ -196,7 +196,12 @@ namespace VFrame.UI
             EnqueueCommand(new PushRouteGroupCommandWithManipulator<TView>(manipulator));
         }
 
-        public static void Back(bool isThrowEmpty = false)
+        public static void Back()
+        {
+            Back(false);
+        }
+        
+        public static void Back(bool isThrowEmpty)
         {
             if (IsBlocking) return;
             if (!_sharedInstance.View.SafetyAny())
