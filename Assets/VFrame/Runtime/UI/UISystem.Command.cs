@@ -53,9 +53,9 @@ namespace VFrame.UI
                 while (Commands.Any())
                 {
                     var command = Commands.Dequeue();
-#if UNITY_EDITOR
-                    Debug.Log($"Execute: {command.GetType().Name}");
-#endif
+// #if UNITY_EDITOR
+//                     Debug.Log($"Execute: {command.GetType().Name}");
+// #endif
                     await command.Execute(_sharedInstance);
                 }
             }
