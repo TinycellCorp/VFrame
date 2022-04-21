@@ -21,6 +21,7 @@ namespace VFrame.UI
     public partial class UISystem : IDisposable, IInitializable, ISystemContext
     {
         private static readonly Stack<LifetimeScope> Scopes = new Stack<LifetimeScope>();
+
         public static UniTask Ready
         {
             get
@@ -292,7 +293,17 @@ namespace VFrame.UI
 
         T ISystemContext.Resolve<T>() => _container.Resolve<T>();
 
+        T ISystemContext.Resolve<T>(Type type)
+        {
+            var instance = _container.Resolve(type);
+            if (instance is T resolved)
+            {
+                return resolved;
+            }
 
+            throw new InvalidCastException($"{instance.GetType().Name} to {typeof(T).Name}");
+        }
+        
         T ISystemContext.ResolveView<T>() => _container.Resolve<T>();
 
         IAnimation ISystemContext.ResolveAnimation<T>()

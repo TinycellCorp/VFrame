@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DISALBE_COMMAND_LOG
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -53,7 +55,7 @@ namespace VFrame.UI
                 while (Commands.Any())
                 {
                     var command = Commands.Dequeue();
-#if UNITY_EDITOR
+#if !DISALBE_COMMAND_LOG && UNITY_EDITOR
                     Debug.Log($"Execute: {command.GetType().Name}");
 #endif
                     await command.Execute(_sharedInstance);

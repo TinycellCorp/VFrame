@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using VFrame.UI.Animation;
 using VFrame.UI.Command.Route;
 using VFrame.UI.Group;
@@ -10,6 +11,7 @@ namespace VFrame.UI.Context
     public interface ISystemContext
     {
         T Resolve<T>();
+        T Resolve<T>(Type type);
         T ResolveView<T>() where T : class, IView;
         IAnimation ResolveAnimation<T>() where T : class, IView;
         IAnimation ResolveAnimation(IView view);

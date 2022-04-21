@@ -235,6 +235,7 @@ namespace VFrame.UI.Extension
                 _builder.Register<IViewMatcher<IGroup>, GroupMatcher<TChild, TabGroup<TParent>>>(Lifetime.Scoped);
             }
         }
+        
 
         #region Message
 
