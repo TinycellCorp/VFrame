@@ -12,7 +12,7 @@ namespace VFrame.UI
     {
         // [SerializeField] private BlackboardAsset blackboardAsset;
 
-        public void Configure(IContainerBuilder builder)
+        public virtual void Configure(IContainerBuilder builder)
         {
             if (VFrameSettings.Instance.BlackboardAsset != null)
             {
