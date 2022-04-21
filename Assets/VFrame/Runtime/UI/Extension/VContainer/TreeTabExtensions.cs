@@ -5,7 +5,7 @@ using VFrame.UI.Matcher;
 using VFrame.UI.Tab;
 using VFrame.UI.View;
 
-namespace VFrame.UI.Extension.VContainerBuilderExtension
+namespace VFrame.UI.Extension.VContainer
 {
     public static class TreeTabExtensions
     {
