@@ -72,6 +72,13 @@ namespace VFrame.UI
             PlayCommands();
         }
 
+        private static bool SafeEnqueueCommand(ICommand command)
+        {
+            if (IsBlocking) return false;
+            EnqueueCommand(command);
+            return true;
+        }
+
         private static void ExecuteCacheCommand(ICommand command)
         {
             if (_container == null)
@@ -154,20 +161,22 @@ namespace VFrame.UI
 
         public static void To(IView view)
         {
-            if (IsBlocking) return;
-            EnqueueCommand(new PushRouteGroupCommand(view));
+            SafeEnqueueCommand(new PushRouteGroupCommand(view));
         }
 
         public static void To<TView>() where TView : class, IView
         {
-            if (IsBlocking) return;
-            EnqueueCommand(new PushRouteGroupCommand<TView>());
+            SafeEnqueueCommand(new PushRouteGroupCommand<TView>());
+        }
+
+        public static void Execute(ICommand command)
+        {
+            SafeEnqueueCommand(command);
         }
 
         public static void Log(string message)
         {
-            if (IsBlocking) return;
-            EnqueueCommand(new LogCommand(message));
+            SafeEnqueueCommand(new LogCommand(message));
         }
 
         private class LogCommand : ICommand
@@ -188,21 +197,19 @@ namespace VFrame.UI
 
         public static void To(IView view, IManipulator manipulator)
         {
-            if (IsBlocking) return;
-            EnqueueCommand(new PushRouteGroupCommandWithManipulator(view, manipulator));
+            SafeEnqueueCommand(new PushRouteGroupCommandWithManipulator(view, manipulator));
         }
 
         public static void To<TView>(IManipulator manipulator) where TView : class, IView
         {
-            if (IsBlocking) return;
-            EnqueueCommand(new PushRouteGroupCommandWithManipulator<TView>(manipulator));
+            SafeEnqueueCommand(new PushRouteGroupCommandWithManipulator<TView>(manipulator));
         }
 
         public static void Back()
         {
             Back(false);
         }
-        
+
         public static void Back(bool isThrowEmpty)
         {
             if (IsBlocking) return;

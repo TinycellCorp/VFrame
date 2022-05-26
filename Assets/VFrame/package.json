@@ -6,23 +6,16 @@
   "description": "using VContainer framework",
   "documentationUrl": "",
   "dependencies": {
-    "jp.hadashikick.vcontainer": "1.9.0",
     "com.cysharp.unitask": "2.2.5",
+    "jp.hadashikick.vcontainer": "1.9.0",
+    "com.demigiant.dotween": "1.2.632",
     "com.unity.localization": "1.0.5",
-    "com.demigiant.dotween": "1.2.632"
+    "com.unity.addressables": "1.19.18",
+    "com.unity.textmeshpro": "3.0.6"
   },
   "author": {
     "name": "qkrsogusl3",
     "email": "qkrsogusl3@gmail.com",
     "url": ""
-  },
-  "scopedRegistries": [{
-    "name": "package.openupm.com",
-    "url": "https://package.openupm.com",
-    "scopes": [
-      "jp.hadashikick.vcontainer",
-      "com.cysharp.unitask",
-      "com.demigiant.dotween"
-    ]
-  }]
+  }
 }

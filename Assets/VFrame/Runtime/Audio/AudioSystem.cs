@@ -10,6 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace VFrame.Audio
 {
+    [Obsolete]
     public class AudioSystem : IInitializable
     {
         private static AudioSystem _sharedInstance;

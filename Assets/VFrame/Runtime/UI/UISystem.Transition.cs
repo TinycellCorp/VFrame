@@ -11,8 +11,7 @@ namespace VFrame.UI
         public static void Transition<T>(T transition)
             where T : class, ITransition
         {
-            if (IsBlocking) return;
-            EnqueueCommand(new InTransitionCommand(transition));
+            SafeEnqueueCommand(new InTransitionCommand(transition));
         }
 
 

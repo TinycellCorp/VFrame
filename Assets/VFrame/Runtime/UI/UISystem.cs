@@ -303,7 +303,7 @@ namespace VFrame.UI
 
             throw new InvalidCastException($"{instance.GetType().Name} to {typeof(T).Name}");
         }
-        
+
         T ISystemContext.ResolveView<T>() => _container.Resolve<T>();
 
         IAnimation ISystemContext.ResolveAnimation<T>()
