@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using VFrame.Audio;
 using VFrame.UI;
@@ -13,7 +14,9 @@ namespace VFrame.Core
         
         public RootCanvas RootCanvas;
         public BlackboardAsset BlackboardAsset;
-        public AudioGroup[] AudioGroups;
+        
+        // [Obsolete]
+        // public AudioGroup[] AudioGroups;
 
 #if UNITY_EDITOR
         [UnityEditor.MenuItem("Assets/Create/VFrame/VFrame Settings")]

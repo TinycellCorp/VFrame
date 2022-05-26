@@ -22,7 +22,7 @@ namespace VFrame.UI
             else
             {
                 //todo: register safety
-                throw new ArgumentNullException($"{nameof(BlackboardAsset)}");
+                // Debug.LogWarning("");
             }
 
             UISystem.RootConfigure(gameObject.scene, builder);

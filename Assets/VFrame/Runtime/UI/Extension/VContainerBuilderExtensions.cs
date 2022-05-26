@@ -100,7 +100,7 @@ namespace VFrame.UI.Extension
             ThrowVFrameSettingsIsNull();
 
             var rootCanvasPrefab = VFrameSettings.Instance.RootCanvas;
-
+        
             RootCanvas rootCanvas;
             using (rootCanvasPrefab.InstantiateBefore(out rootCanvas))
             {
@@ -119,28 +119,30 @@ namespace VFrame.UI.Extension
             builder.RegisterViewAnimation<FadeView, FadeAnimation<FadeView>>();
         }
 
+        [Obsolete]
         public static void UseAudioSystem(this IContainerBuilder builder)
         {
-            ThrowVFrameSettingsIsNull();
-            var groups = VFrameSettings.Instance.AudioGroups;
-            builder.RegisterEntryPoint<AudioSystem>().AsSelf()
-                .WithParameter(groups)
-                .WithParameter(new Dictionary<string, IAudioSourcePlayer>
-                {
-                    {"SFX", new PlayOneShotPlayer()},
-                    {"BGM", new BGMPlayer()}
-                });
+            // ThrowVFrameSettingsIsNull();
+            // var groups = VFrameSettings.Instance.AudioGroups;
+            // builder.RegisterEntryPoint<AudioSystem>().AsSelf()
+            //     .WithParameter(groups)
+            //     .WithParameter(new Dictionary<string, IAudioSourcePlayer>
+            //     {
+            //         {"SFX", new PlayOneShotPlayer()},
+            //         {"BGM", new BGMPlayer()}
+            //     });
         }
 
+        [Obsolete]
         public static void UseAudioSystem(this IContainerBuilder builder, Action<AudioSystemBuilder> configuration)
         {
-            ThrowVFrameSettingsIsNull();
-            var groups = VFrameSettings.Instance.AudioGroups;
-            var registration = builder.RegisterEntryPoint<AudioSystem>().AsSelf().WithParameter(groups);
-
-            var audioSystemBuilder = new AudioSystemBuilder(builder);
-            configuration(audioSystemBuilder);
-            registration.WithParameter(audioSystemBuilder.Players);
+            // ThrowVFrameSettingsIsNull();
+            // var groups = VFrameSettings.Instance.AudioGroups;
+            // var registration = builder.RegisterEntryPoint<AudioSystem>().AsSelf().WithParameter(groups);
+            //
+            // var audioSystemBuilder = new AudioSystemBuilder(builder);
+            // configuration(audioSystemBuilder);
+            // registration.WithParameter(audioSystemBuilder.Players);
         }
 
         public readonly struct AudioSystemBuilder
