@@ -56,6 +56,10 @@ namespace VFrame.UI.Command
             public async UniTask Execute()
             {
                 await _nextView.Ready();
+                if (_context.View.TryPopManipulator(_nextView, out var manipulator))
+                {
+                    await manipulator.Ready(_nextView);
+                }
 
                 _context.View.ClearSafe();
 
