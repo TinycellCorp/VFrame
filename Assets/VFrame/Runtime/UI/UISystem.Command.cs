@@ -54,11 +54,22 @@ namespace VFrame.UI
 
                 while (Commands.Any())
                 {
-                    var command = Commands.Dequeue();
+                    try
+                    {
+                        var command = Commands.Dequeue();
 #if !DISALBE_COMMAND_LOG && UNITY_EDITOR
                     Debug.Log($"Execute: {command.GetType().Name}");
 #endif
-                    await command.Execute(_sharedInstance);
+                        await command.Execute(_sharedInstance);
+                    }
+                    catch (Exception e)
+                    {
+                        Commands.Clear();
+#if UNITY_EDITOR
+                        Debug.LogException(e);
+#endif
+                        break;
+                    }
                 }
             }
 
