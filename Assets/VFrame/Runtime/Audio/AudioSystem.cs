@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEPRECATED
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -233,6 +234,10 @@ namespace VFrame.Audio
 
         public static void Play(string key)
         {
+#if DEPRECATED
+            Debug.Log("DEPRECATED");
+            return;
+#endif
             if (string.IsNullOrEmpty(key)) return;
             _sharedInstance.LoadAndPlay(key);
         }
