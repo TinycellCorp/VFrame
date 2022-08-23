@@ -10,7 +10,7 @@ using VFrame.UI.Animation;
 using VFrame.UI.Transition;
 
 
-namespace VFrame.UI.External
+namespace VFrame.UI.SubScene
 {
     public class FadeOutAfterPreload : IPostProcessPreload
     {

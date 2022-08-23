@@ -2,7 +2,7 @@
 using UnityEngine;
 using VFrame.UI.View;
 
-namespace VFrame.UI.External
+namespace VFrame.UI.SubScene
 {
     public class FadeView : ComponentView<FadeView>
     {

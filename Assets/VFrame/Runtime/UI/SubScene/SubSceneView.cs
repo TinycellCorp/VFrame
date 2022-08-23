@@ -5,7 +5,7 @@ using VFrame.UI.Extension;
 using VFrame.UI.Transition;
 using VFrame.UI.View;
 
-namespace VFrame.UI.External
+namespace VFrame.UI.SubScene
 {
     public abstract class SubSceneView<TView> : VirtualView<TView>, ISubSceneView where TView : class, IView
     {

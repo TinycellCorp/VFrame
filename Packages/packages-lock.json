@@ -7,13 +7,6 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
-    "com.demigiant.dotween": {
-      "version": "1.2.632",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
-    },
     "com.unity.2d.animation": {
       "version": "7.0.2",
       "depth": 1,

@@ -16,7 +16,6 @@ using VContainer.Unity;
 using VFrame.Audio;
 using VFrame.Core;
 using VFrame.UI.Context;
-using VFrame.UI.External;
 using VFrame.UI.Module.Message;
 using VFrame.UI.Pool;
 using Object = UnityEngine.Object;
@@ -100,7 +99,7 @@ namespace VFrame.UI.Extension
             ThrowVFrameSettingsIsNull();
 
             var rootCanvasPrefab = VFrameSettings.Instance.RootCanvas;
-        
+
             RootCanvas rootCanvas;
             using (rootCanvasPrefab.InstantiateBefore(out rootCanvas))
             {
@@ -116,7 +115,9 @@ namespace VFrame.UI.Extension
             builder.Register<IRouteFilter, TransitionRouteFilter>(Lifetime.Scoped);
             builder.Register<IRouteFilter, GroupRouteFilter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<UISystemRootInitializer>();
+#if VFRAME_DOTWEEN
             builder.RegisterViewAnimation<FadeView, FadeAnimation<FadeView>>();
+#endif
         }
 
         [Obsolete]
@@ -237,7 +238,7 @@ namespace VFrame.UI.Extension
                 _builder.Register<IViewMatcher<IGroup>, GroupMatcher<TChild, TabGroup<TParent>>>(Lifetime.Scoped);
             }
         }
-        
+
 
         #region Message
 

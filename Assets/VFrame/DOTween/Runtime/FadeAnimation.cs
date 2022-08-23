@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿#if VFRAME_DOTWEEN
+using Cysharp.Threading.Tasks;
 using VFrame.UI.Animation;
 using VFrame.UI.View;
 
@@ -17,3 +18,4 @@ namespace VFrame.UI.External
         }
     }
 }
+#endif

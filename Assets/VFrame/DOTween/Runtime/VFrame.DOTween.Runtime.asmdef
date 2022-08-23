@@ -1,0 +1,18 @@
+{
+    "name": "VFrame.DOTween.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a558a6f8e0c921d4d9dc294a74ad2400",
+        "GUID:029c1c1b674aaae47a6841a0b89ad80e",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

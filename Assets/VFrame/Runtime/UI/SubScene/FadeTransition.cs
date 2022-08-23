@@ -4,7 +4,7 @@ using VFrame.UI.Context;
 using VFrame.UI.Extension;
 using VFrame.UI.Transition;
 
-namespace VFrame.UI.External
+namespace VFrame.UI.SubScene
 {
     public abstract class FadeTransition : ITransition
     {
