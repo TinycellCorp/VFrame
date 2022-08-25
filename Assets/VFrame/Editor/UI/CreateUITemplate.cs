@@ -111,25 +111,41 @@ namespace VFrame.Editor.UI
                 {"DialogPopup", FindDialogFields}
             };
 
+        /// <summary>
+        /// TODO:
+        /// 여러개를 선택하고 실행하면 메소드가 3번 실행됨.
+        /// 여러 대상의 처리를 위해 Selection.objects를 사용하면 3*3 번 실행됨.
+        /// </summary>
         [MenuItem(MenuPath + "/AutoAttach")]
         static void AutoAttach()
         {
-            if (TryGetScriptType(out var type))
+            var objects = Selection.objects;
+            if (objects == null || objects.Length == 0) return;
+            foreach (var selected in objects)
             {
-                var target = Selection.activeGameObject;
-                var component = target.AddComponent(type);
+                if (selected is not GameObject target) return;
 
-                if (type.BaseType != null)
+                if (TryGetScriptType(target, out var type))
                 {
-                    var name = type.BaseType.Name;
-                    foreach (var pair in RequireFieldFinder)
+                    if (target.TryGetComponent(type, out var attached)) continue;
+                    var component = target.AddComponent(type);
+
+                    if (type.BaseType != null)
                     {
-                        if (name.Contains(pair.Key))
+                        var name = type.BaseType.Name;
+                        foreach (var pair in RequireFieldFinder)
                         {
-                            pair.Value(component);
-                            break;
+                            if (name.Contains(pair.Key))
+                            {
+                                pair.Value(component);
+                                break;
+                            }
                         }
                     }
+                }
+                else
+                {
+                    Debug.LogWarning($"not found script: {target.name}");
                 }
             }
         }
@@ -184,6 +200,27 @@ namespace VFrame.Editor.UI
             scriptType = null;
             if (Selection.activeGameObject == null) return false;
             var name = Selection.activeGameObject.name;
+
+            var script = AssetDatabase
+                .FindAssets($"t:Script {name}")
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<MonoScript>)
+                .FirstOrDefault(script => script.name.Equals(name));
+
+            if (script == null)
+            {
+                return false;
+            }
+
+            scriptType = script.GetClass();
+            return true;
+        }
+
+        static bool TryGetScriptType(GameObject target, out System.Type scriptType)
+        {
+            scriptType = null;
+            if (target == null) return false;
+            var name = target.name;
 
             var script = AssetDatabase
                 .FindAssets($"t:Script {name}")

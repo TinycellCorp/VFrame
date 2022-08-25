@@ -72,7 +72,12 @@ namespace VFrame.UI.Tab
         private List<IView> _searchedPath = new();
         private List<IView> _path = new();
 
+        private readonly List<IView> _hideViews = new();
         private readonly List<UniTask> _awaitTasks = new();
+
+        public IView InLeaf { get; private set; } = null;
+        public IView OutLeaf { get; private set; } = null;
+        private IView _latestLeaf = null;
 
         public async UniTask Push(ISystemContext context, IView view)
         {
@@ -92,8 +97,7 @@ namespace VFrame.UI.Tab
                 startIndex = 0;
                 context.View.Push(rootView);
             }
-            
-            
+
             var hideIndex = startIndex;
             for (int i = hideIndex; i < _searchedPath.Count; i++)
             {
@@ -106,13 +110,6 @@ namespace VFrame.UI.Tab
                 break;
             }
 
-            for (int i = _searchedPath.Count - 1; i >= hideIndex; i--)
-            {
-                _searchedPath[i].Hide();
-            }
-
-            _searchedPath.Clear();
-
             #region Path Ready
 
             for (int i = hideIndex; i < _path.Count; i++)
@@ -123,7 +120,31 @@ namespace VFrame.UI.Tab
 
             #endregion
 
+
+            #region animation out
+
+            InLeaf = view;
+
+            _hideViews.Clear();
+            for (int i = _searchedPath.Count - 1; i >= hideIndex; i--)
+            {
+                var hideView = _searchedPath[i];
+                _hideViews.Add(hideView);
+
+                var ani = context.ResolveAnimator(hideView);
+                _awaitTasks.Add(ani.Out());
+                // [deprecated] move hide views
+                // _searchedPath[i].Hide();
+            }
+
+            _searchedPath.Clear();
+
+            #endregion
+
+
             #region animation in
+
+            OutLeaf = _latestLeaf;
 
             for (int i = hideIndex; i < _path.Count; i++)
             {
@@ -131,12 +152,23 @@ namespace VFrame.UI.Tab
                 _awaitTasks.Add(ani.In());
             }
 
-            await _awaitTasks;
+            await _awaitTasks; // out and in
             _awaitTasks.Clear();
 
             #endregion
 
-            #region On Enter
+            #region Out On Exit
+
+            foreach (var hideView in _hideViews)
+            {
+                hideView.OnExit();
+            }
+
+            _hideViews.Clear();
+
+            #endregion
+
+            #region In On Enter
 
             for (int i = hideIndex; i < _path.Count; i++)
             {
@@ -145,6 +177,7 @@ namespace VFrame.UI.Tab
 
             #endregion
 
+            _latestLeaf = view;
             (_searchedPath, _path) = (_path, _searchedPath);
         }
 
@@ -154,8 +187,7 @@ namespace VFrame.UI.Tab
             {
                 _searchedPath[i].Hide();
             }
-
-            _searchedPath.Clear();
+            Clear();
             await context.Command.Pop();
         }
 
@@ -165,8 +197,14 @@ namespace VFrame.UI.Tab
             {
                 _searchedPath[i].Hide();
             }
+            Clear();
+        }
 
+        private void Clear()
+        {
             _searchedPath.Clear();
+
+            InLeaf = OutLeaf = _latestLeaf = null;
         }
     }
 }
