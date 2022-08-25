@@ -35,9 +35,31 @@ namespace VFrame.UI.Module.Popup
 
         public abstract class DialogManipulator : IDialogManipulator
         {
-            private readonly string _content;
-            private readonly string _positive;
-            private readonly string _negative;
+            private string _content;
+            private string _positive;
+            private string _negative;
+
+            protected string ContentText
+            {
+                set => _content = value;
+                get => _content;
+            }
+
+            protected string PositiveText
+            {
+                set => _positive = value;
+                get => _positive;
+            }
+
+            protected string NegativeText
+            {
+                set => _negative = value;
+                get => _negative;
+            }
+
+            protected DialogManipulator()
+            {
+            }
 
             protected DialogManipulator(string content, string positive, string negative)
                 => (_content, _positive, _negative) = (content, positive, negative);
