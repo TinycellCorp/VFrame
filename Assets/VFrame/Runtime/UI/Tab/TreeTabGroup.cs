@@ -183,12 +183,12 @@ namespace VFrame.UI.Tab
 
         public async UniTask Pop(ISystemContext context)
         {
+            await context.Command.Pop();
             for (int i = _searchedPath.Count - 1; i > 0; i--)
             {
                 _searchedPath[i].Hide();
             }
             Clear();
-            await context.Command.Pop();
         }
 
         public void OnImmediatePop(IView view)

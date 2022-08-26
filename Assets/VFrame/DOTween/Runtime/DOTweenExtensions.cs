@@ -53,9 +53,16 @@ namespace VFrame.UI.External
             this IView target, Vector2 endValue, float duration, bool snapping = false
         )
         {
+            return target.Rect.DOAnchoredMove(endValue, duration, snapping);
+        }
+
+        public static TweenerCore<Vector2, Vector2, VectorOptions> DOAnchoredMove(
+            this RectTransform target, Vector2 endValue, float duration, bool snapping = false
+        )
+        {
             TweenerCore<Vector2, Vector2, VectorOptions> t = DOTween.To(
-                (DOGetter<Vector2>) (() => target.Rect.anchoredPosition),
-                (DOSetter<Vector2>) (p => target.Rect.anchoredPosition = p), endValue, duration);
+                (DOGetter<Vector2>) (() => target.anchoredPosition),
+                (DOSetter<Vector2>) (p => target.anchoredPosition = p), endValue, duration);
             t.SetOptions(snapping).SetTarget<Tweener>((object) target);
             return t;
         }
