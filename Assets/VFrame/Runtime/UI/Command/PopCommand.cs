@@ -6,9 +6,23 @@ namespace VFrame.UI.Command
 {
     public class PopCommand : ICommand
     {
+        private readonly bool _isSafety;
+
+        public PopCommand(bool isSafety = true)
+        {
+            _isSafety = isSafety;
+        }
+
         public async UniTask Execute(ISystemContext context)
         {
-            if (!context.View.SafetyAny()) return;
+            if (_isSafety)
+            {
+                if (!context.View.SafetyAny()) return;
+            }
+            else
+            {
+                if (!context.View.Any()) return;
+            }
 
             var outView = context.View.Pop();
             var outAnimation = context.ResolveAnimation(outView);

@@ -5,10 +5,24 @@ namespace VFrame.UI.Command.Route
 {
     public class PopRouteGroupCommand : ICommand
     {
+        private readonly bool _isSafety;
+
+        public PopRouteGroupCommand(bool isSafety = true)
+        {
+            _isSafety = isSafety;
+        }
+
         public async UniTask Execute(ISystemContext context)
         {
-            if (!context.View.SafetyAny()) return;
-            
+            if (_isSafety)
+            {
+                if (!context.View.SafetyAny()) return;
+            }
+            else
+            {
+                if (!context.View.Any()) return;
+            }
+
             var filters = context.ResolveRouteFilters();
             var peek = context.View.Peek();
 
@@ -18,7 +32,8 @@ namespace VFrame.UI.Command.Route
                 if (isSuccess) return;
             }
 
-            await context.Command.Pop();
+            await new PopCommand(_isSafety).Execute(context);
+            // await context.Command.Pop();
         }
     }
 }

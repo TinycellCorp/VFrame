@@ -224,17 +224,34 @@ namespace VFrame.UI
         public static void Back(bool isThrowEmpty)
         {
             if (IsBlocking) return;
-            if (!_sharedInstance.View.SafetyAny())
+            if (_entryView == null)
             {
-                if (isThrowEmpty)
+                if (!_sharedInstance.View.Any())
                 {
-                    throw new EmptySafetyAnyException();
+                    if (isThrowEmpty)
+                    {
+                        throw new EmptySafetyAnyException();
+                    }
+
+                    return;
                 }
 
-                return;
+                EnqueueCommand(new PopRouteGroupCommand(false));
             }
+            else
+            {
+                if (!_sharedInstance.View.SafetyAny())
+                {
+                    if (isThrowEmpty)
+                    {
+                        throw new EmptySafetyAnyException();
+                    }
 
-            EnqueueCommand(new PopRouteGroupCommand());
+                    return;
+                }
+
+                EnqueueCommand(new PopRouteGroupCommand());
+            }
         }
 
 

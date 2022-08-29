@@ -4,6 +4,7 @@ using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
 using VFrame.UI.View;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace VFrame.UI.External
 {
@@ -84,6 +85,21 @@ namespace VFrame.UI.External
             float duration)
         {
             var alpha = DOTween.To(() => target.alpha, a => target.alpha = a, endValue, duration);
+            alpha.SetTarget(target);
+            return alpha;
+        }
+
+        public static TweenerCore<float, float, FloatOptions> DOFade(
+            this Image target,
+            float endValue,
+            float duration)
+        {
+            var alpha = DOTween.To(() => target.color.a, a =>
+            {
+                var c = target.color;
+                c.a = a;
+                target.color = c;
+            }, endValue, duration);
             alpha.SetTarget(target);
             return alpha;
         }
