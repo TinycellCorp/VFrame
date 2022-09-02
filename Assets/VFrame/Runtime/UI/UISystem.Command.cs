@@ -65,7 +65,7 @@ namespace VFrame.UI
                     catch (Exception e)
                     {
                         Commands.Clear();
-#if UNITY_EDITOR
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogException(e);
 #endif
                         break;
