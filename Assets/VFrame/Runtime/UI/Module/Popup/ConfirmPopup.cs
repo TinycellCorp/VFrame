@@ -29,11 +29,26 @@ namespace VFrame.UI.Module.Popup
 
         public abstract class ConfirmManipulator : IManipulator
         {
-            private readonly string _content;
-            private readonly string _confirm;
+            private string _content;
+            private string _confirm;
 
+            protected string ContentText
+            {
+                set => _content = value;
+            }
+
+            protected string ConfirmText
+            {
+                set => _confirm = value;
+            }
+
+            protected ConfirmManipulator()
+            {
+                
+            }
             protected ConfirmManipulator(string content, string confirm)
                 => (_content, _confirm) = (content, confirm);
+
 
             public async UniTask Ready(IView view)
             {
@@ -56,6 +71,5 @@ namespace VFrame.UI.Module.Popup
             protected abstract UniTask PostReady(ConfirmPopup<TView> view);
             protected abstract void Confirm();
         }
-
     }
 }
