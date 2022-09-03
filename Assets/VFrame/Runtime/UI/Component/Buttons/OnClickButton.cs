@@ -13,7 +13,7 @@ namespace VFrame.UI.Component.Buttons
 
         private void OnDestroy()
         {
-            GetComponent<Button>().onClick.RemoveAllListeners();
+            GetComponent<Button>().onClick.RemoveListener(OnClick);
         }
 
         protected abstract void OnClick();
