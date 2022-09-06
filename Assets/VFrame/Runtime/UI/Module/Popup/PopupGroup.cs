@@ -43,7 +43,9 @@ namespace VFrame.UI.Module.Popup
                 tasks.Item2 = context.Command.Push(view);
             }
 
+            view.IsInteractable = false;
             await tasks;
+            view.IsInteractable = true;
 
             _views.Push(view);
         }
@@ -83,7 +85,7 @@ namespace VFrame.UI.Module.Popup
                 _shadow.Hide();
             }
         }
-        
+
         private void RepositionShadow(TShadow shadow, IView view)
         {
             if (shadow.Rect.parent != view.Rect.parent)
@@ -106,6 +108,5 @@ namespace VFrame.UI.Module.Popup
                 shadow.Rect.localScale = Vector3.one;
             }
         }
-
     }
 }
