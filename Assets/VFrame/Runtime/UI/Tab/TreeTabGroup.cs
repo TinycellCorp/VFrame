@@ -114,12 +114,16 @@ namespace VFrame.UI.Tab
 
             for (int i = hideIndex; i < _path.Count; i++)
             {
-                _path[i].IsActive = true;
-                await _path[i].Ready();
+                var v = _path[i];
+                v.IsActive = true;
+                await v.Ready();
+                if (context.View.TryPopManipulator(v, out var manipulator))
+                {
+                    await manipulator.Ready(v);
+                }
             }
 
             #endregion
-
 
             #region animation out
 
@@ -131,8 +135,9 @@ namespace VFrame.UI.Tab
                 var hideView = _searchedPath[i];
                 _hideViews.Add(hideView);
 
-                var ani = context.ResolveAnimator(hideView);
-                _awaitTasks.Add(ani.Out());
+                // var ani = context.ResolveAnimator(hideView);
+                var ani = context.ResolveAnimation(hideView);
+                _awaitTasks.Add(ani.Out(hideView));
                 // [deprecated] move hide views
                 // _searchedPath[i].Hide();
             }
@@ -141,15 +146,15 @@ namespace VFrame.UI.Tab
 
             #endregion
 
-
             #region animation in
 
             OutLeaf = _latestLeaf;
 
             for (int i = hideIndex; i < _path.Count; i++)
             {
-                var ani = context.ResolveAnimator(_path[i]);
-                _awaitTasks.Add(ani.In());
+                // var ani = context.ResolveAnimator(_path[i]);
+                var ani = context.ResolveAnimation(_path[i]);
+                _awaitTasks.Add(ani.In(_path[i]));
             }
 
             await _awaitTasks; // out and in
@@ -188,6 +193,7 @@ namespace VFrame.UI.Tab
             {
                 _searchedPath[i].Hide();
             }
+
             Clear();
         }
 
@@ -197,6 +203,7 @@ namespace VFrame.UI.Tab
             {
                 _searchedPath[i].Hide();
             }
+
             Clear();
         }
 
