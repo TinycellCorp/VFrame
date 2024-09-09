@@ -12,9 +12,9 @@ namespace VFrame.UI.Module.Popup
     {
         protected override void Awake()
         {
-            UISystem.RegisterPopup<TView, IPopupGroup, IAnimation<IPopupView>>(this);
+            //UISystem.RegisterPopup<TView, IPopupGroup, IAnimation<IPopupView>>(this);
             //Layer 스펙 점검 필요. 그 전 까지 비활성화 (AddressableView 부모 못 찾는 상태) 
-            // UISystem.Register<TView, PopupLayer,IPopupGroup, IAnimation<IPopupView>>(this);
+            UISystem.Register<TView, PopupLayer, IPopupGroup, IAnimation<IPopupView>>(this);
             Init();
         }
     }
