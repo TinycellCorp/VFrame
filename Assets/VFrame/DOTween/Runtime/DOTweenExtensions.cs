@@ -1,4 +1,5 @@
 #if VFRAME_DOTWEEN
+using System;
 using DG.Tweening;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
@@ -103,6 +104,136 @@ namespace VFrame.UI.External
             alpha.SetTarget(target);
             return alpha;
         }
+
+        public static TweenerCore<Vector3, Vector3, VectorOptions> DOScale(
+    this RectTransform target,
+    Vector3 endValue,
+    float duration)
+{
+    TweenerCore<Vector3, Vector3, VectorOptions> t = DOTween.To(
+        () => target.localScale,
+        x => target.localScale = x,
+        endValue,
+        duration
+    );
+    t.SetTarget(target);
+    return t;
+}
+
+public static void DOScaleChildren(
+    this RectTransform parent,
+    Vector3 endValue,
+    float duration)
+{
+    foreach (RectTransform child in parent)
+    {
+        child.DOScale(endValue, duration);
+    }
+}
+
+public static void DOScaleChildren(
+    this RectTransform parent,
+    Vector3 endValue,
+    float duration,
+    Func<RectTransform, bool> filter)
+{
+    foreach (RectTransform child in parent)
+    {
+        if (filter(child))
+        {
+            child.DOScale(endValue, duration);
+        }
+    }
+}
+
+public static TweenerCore<Vector3, Vector3, VectorOptions> DOScale(
+    this IView target,
+    Vector3 endValue,
+    float duration)
+{
+    return target.Rect.DOScale(endValue, duration);
+}
+
+public static void DOScaleChildren(
+    this IView target,
+    Vector3 endValue,
+    float duration)
+{
+    target.Rect.DOScaleChildren(endValue, duration);
+}
+
+public static void DOScaleChildren(
+    this RectTransform parent,
+    Vector3 endValue,
+    float duration,
+    Sequence sequence)
+{
+    foreach (RectTransform child in parent)
+    {
+        var tweener = child.DOScale(endValue, duration).SetEase(Ease.OutExpo).SetUpdate(true);
+        sequence.Insert(0, tweener);  // 각 자식의 스케일 애니메이션을 시퀀스에 추가
+    }
+}
+
+public static void DOScaleChildren(
+    this IView target,
+    Vector3 endValue,
+    float duration,
+    Func<RectTransform, bool> filter)
+{
+    target.Rect.DOScaleChildren(endValue, duration, filter);
+}
+
+public static void DOScaleChildren(
+    this RectTransform parent,
+    Vector3 startValue,
+    Vector3 endValue,
+    float duration,
+    Sequence sequence,
+    Func<RectTransform, bool> filter)
+{
+    foreach (RectTransform child in parent)
+    {
+        if (filter(child))
+        {
+            child.localScale =startValue;
+            var tweener = child.DOScale(endValue, duration).SetEase(Ease.OutExpo).SetUpdate(true);
+            sequence.Insert(0, tweener);  // 각 자식의 스케일 애니메이션을 시퀀스에 추가
+        }
+        else
+        {
+            foreach (RectTransform cChild in child)
+            {
+                if (filter(cChild))
+                {
+                    cChild.localScale =startValue;
+                    var tweener = cChild.DOScale(endValue, duration).SetEase(Ease.OutExpo).SetUpdate(true);
+                    sequence.Insert(0, tweener);  // 각 자식의 스케일 애니메이션을 시퀀스에 추가
+                }
+            }
+        }
+    }
+}
+
+public static void DOPunchSacleChildren(
+    this RectTransform parent,
+    Vector3 startValue,
+    Vector3 endValue,
+    float duration,
+    Sequence sequence,
+    Func<RectTransform, bool> filter)
+{
+    foreach (RectTransform child in parent)
+    {
+        if (filter(child))
+        {
+            child.localScale = startValue;
+            var tweener = child.DOPunchScale(endValue, duration).SetEase(Ease.OutExpo).SetUpdate(true);
+            sequence.Insert(0, tweener);  // 각 자식의 스케일 애니메이션을 시퀀스에 추가
+        }
+    }
+}
+
     }
 }
 #endif
