@@ -42,8 +42,8 @@ namespace VFrame.UI
         private static IObjectResolver _container;
         private static RootCanvas _rootCanvas;
 #if UNITY_2021_2_OR_NEWER
-        private static readonly Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>> RegisteredViews =
-            new();
+        private static readonly Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>> RegisteredViews = new();
+        private static readonly Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>> SceneViews = new();
 
         private readonly LifetimeScope _rootScope;
         private readonly Dictionary<Type, ILayer> _layers = new();
@@ -52,6 +52,8 @@ namespace VFrame.UI
         private readonly Dictionary<IView, ITransition> _transitions = new();
 #else
         private static readonly Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>> RegisteredViews =
+            new Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>>();
+        private static readonly Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>> SceneViews =
             new Dictionary<UnityEngine.SceneManagement.Scene, Queue<ComponentView>>();
 
         private readonly LifetimeScope _rootScope;
@@ -87,7 +89,7 @@ namespace VFrame.UI
 
         #region Static Methods
 
-        private static void RegisterViewsWithBuildCallback(IContainerBuilder builder, Queue<ComponentView> views)
+        private static void RegisterViewsWithBuildCallback(IContainerBuilder builder, Queue<ComponentView> views, Queue<ComponentView> sceneViews = null)
         {
             var viewsArray = views.ToArray();
             builder.RegisterBuildCallback(_ =>
@@ -101,6 +103,8 @@ namespace VFrame.UI
             {
                 var view = views.Dequeue();
                 builder.RegisterScopedInstanceWithInterfaces(view);
+
+                sceneViews?.Enqueue(view);
             }
         }
 
@@ -117,8 +121,17 @@ namespace VFrame.UI
 
             var scene = sceneScope.gameObject.scene;
             if (!RegisteredViews.TryGetValue(scene, out var views)) return;
+            if (SceneViews.TryGetValue(scene, out var sceneViews))
+            {
+                sceneViews.Clear();
+            }
+            else
+            {
+                sceneViews = new Queue<ComponentView>();
+                SceneViews.Add(scene, sceneViews);
+            }
 
-            RegisterViewsWithBuildCallback(builder, views);
+            RegisterViewsWithBuildCallback(builder, views, sceneViews);
 
             RegisteredViews.Remove(scene);
 
@@ -164,6 +177,20 @@ namespace VFrame.UI
                 _systemReadySource = new UniTaskCompletionSource();
                 _container = null;
                 _entryView = null;
+            }
+            
+            var scene = scope.gameObject.scene;
+            if (SceneViews.TryGetValue(scene, out var views))
+            {
+                while (views.Any())
+                {
+                    var view = views.Dequeue();
+                    if (view != null && view.gameObject != null)
+                    {
+                        Object.Destroy(view.gameObject);
+                    }
+                }
+                SceneViews.Remove(scene);
             }
         }
 

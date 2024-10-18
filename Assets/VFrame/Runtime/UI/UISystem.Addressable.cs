@@ -8,6 +8,7 @@ using VFrame.UI.Context;
 using VFrame.UI.View;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.SceneManagement;
 
 namespace VFrame.UI
 {
@@ -89,6 +90,18 @@ namespace VFrame.UI
                 view.Rect.localScale = Vector3.one;
                 view.IsActive = false;
                 _loadingKeys.Remove(key);
+                
+                var scene = SceneManager.GetActiveScene();
+                if (SceneViews.TryGetValue(scene, out var views))
+                {
+                    views.Enqueue(view);
+                }
+                else
+                {
+                    views = new Queue<ComponentView>();
+                    views.Enqueue(view);
+                    SceneViews.Add(scene, views);
+                }
             }
 
             return _loadedViews[key];
