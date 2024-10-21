@@ -100,6 +100,7 @@ namespace VFrame.UI.View
 
         protected void PositionZero()
         {
+            transform.localScale = Vector3.one;
             Rect.anchoredPosition = Vector2.zero;
         }
 
