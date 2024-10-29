@@ -17,7 +17,7 @@ namespace VFrame.UI.Command
 
         public async UniTask Execute(ISystemContext context)
         {
-            using (UISystem.EnableBlocking())
+            using (UISystem.EnableCommandBlocking())
             {
                 var nextView = GetNextView(context);
                 if (context.View.Contains(nextView)) return;
