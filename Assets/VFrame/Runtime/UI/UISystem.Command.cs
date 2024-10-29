@@ -16,11 +16,12 @@ namespace VFrame.UI
     {
         private static bool _isBlocking = false;
         private static bool _isIgnoreBlocking = false;
+        private static bool _isCommandBlocking = false;
 
         private static readonly Queue<ICommand> Commands = new Queue<ICommand>();
         private static UniTaskStatus _playCommandStatus = UniTaskStatus.Succeeded;
 
-        private static bool IsBlocking => !_isIgnoreBlocking && _isBlocking;
+        private static bool IsBlocking => _isIgnoreBlocking == false && (_isBlocking || _isCommandBlocking);
 
         private static IView _entryView;
 
@@ -48,7 +49,7 @@ namespace VFrame.UI
             if (!Commands.Any()) return;
             _playCommandStatus = UniTaskStatus.Pending;
 
-            using (EnableBlocking())
+            using (EnableCommandBlocking())
             {
                 await UniTask.NextFrame(PlayerLoopTiming.PostLateUpdate);
 
@@ -128,6 +129,20 @@ namespace VFrame.UI
             public void Dispose()
             {
                 _isIgnoreBlocking = false;
+            }
+        }
+        
+        public static CommandBlockingHandler EnableCommandBlocking()
+        {
+            _isCommandBlocking = true;
+            return new CommandBlockingHandler();
+        }
+        
+        public readonly struct CommandBlockingHandler : IDisposable
+        {
+            public void Dispose()
+            {
+                _isCommandBlocking = false;
             }
         }
 

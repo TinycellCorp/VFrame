@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using VFrame.UI.Command;
 using VFrame.UI.Context;
 using VFrame.UI.Extension;
@@ -13,6 +14,19 @@ namespace VFrame.UI
         private readonly Stack<IView> _views = new Stack<IView>();
         private readonly Dictionary<IView, IManipulator> _manipulators = new Dictionary<IView, IManipulator>();
         public IViewContext View => this;
+        
+        public static UniTask WaitUntilSafeAny()
+        {
+            return UniTask.WaitUntil(() => _sharedInstance?.View?.SafetyAny() == false);
+        }
+        
+        public static bool SafetyAny()
+        {
+            if (_sharedInstance == null)
+                return false;
+
+            return _sharedInstance?.View?.SafetyAny() ?? false;
+        }
 
         void IViewContext.Push(IView view)
         {
