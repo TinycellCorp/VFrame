@@ -31,7 +31,7 @@ namespace VFrame.UI.SubScene
 
                 var view = context.Resolve<TSubSceneView>();
                 var operation = SceneManager.LoadSceneAsync(view.SceneName, LoadSceneMode.Additive);
-                await operation;
+                await operation.ToUniTask();
                 operation.Active();
                 
                 await job.Execute();
@@ -46,7 +46,7 @@ namespace VFrame.UI.SubScene
 
                 var view = context.Resolve<TSubSceneView>();
                 var operation = SceneManager.UnloadSceneAsync(view.SceneName);
-                await operation;
+                await operation.ToUniTask();
 
                 await animator.Out();
             }
