@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.ResourceManagement.ResourceProviders;
 using VFrame.Extension;
 using VFrame.UI.Animation;
 using VFrame.UI.Command.Route;
@@ -12,6 +13,7 @@ using VFrame.UI.Tab;
 using VFrame.UI.Transition;
 using VFrame.UI.View;
 using VContainer;
+using VContainer.Internal;
 using VContainer.Unity;
 using VFrame.Audio;
 using VFrame.Core;
@@ -19,6 +21,7 @@ using VFrame.UI.Context;
 using VFrame.UI.Module.Message;
 using VFrame.UI.Pool;
 using VFrame.UI.SubScene;
+using IInstanceProvider = VContainer.IInstanceProvider;
 using Object = UnityEngine.Object;
 
 namespace VFrame.UI.Extension
@@ -116,7 +119,7 @@ namespace VFrame.UI.Extension
             builder.Register<IRouteFilter, TransitionRouteFilter>(Lifetime.Scoped);
             builder.Register<IRouteFilter, GroupRouteFilter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<UISystemRootInitializer>();
-        
+
             // [Deprecated] Require manual register
             // builder.RegisterViewAnimation<FadeView, FadeAnimation<FadeView>>();
         }
@@ -319,51 +322,67 @@ namespace VFrame.UI.Extension
     /// <summary>
     /// RegisterInstance(Lifetime.Scoped).AsImplementedInterfaces()
     /// </summary>
-    public class ScopedInstanceWithInterfacesBuilder : RegistrationBuilder, IRegistration
+    public class ScopedInstanceWithInterfacesBuilder : RegistrationBuilder
     {
-        readonly object implementationInstance;
+        private readonly object _instance;
 
         public ScopedInstanceWithInterfacesBuilder(object implementationInstance)
             : base(implementationInstance.GetType(), Lifetime.Scoped)
         {
-            this.implementationInstance = implementationInstance;
-            var interfaceTypes = new List<Type> {ImplementationType};
+            var interfaceTypes = new List<Type> { ImplementationType };
             interfaceTypes.AddRange(ImplementationType.GetInterfaces());
             InterfaceTypes = interfaceTypes;
+
+            _instance = implementationInstance;
         }
 
-        public override IRegistration Build() => this;
-
-        public object SpawnInstance(IObjectResolver resolver) => implementationInstance;
-
-        public Type ImplementationType => implementationInstance.GetType();
-
-        public IReadOnlyList<Type> InterfaceTypes { get; }
-
-        public Lifetime Lifetime { get; }
+        public override Registration Build()
+        {
+            var spawner = new SceneInstanceProvider(_instance);
+            return new Registration(
+                ImplementationType,
+                Lifetime,
+                InterfaceTypes,
+                spawner);
+        }
     }
 
     /// <summary>
     /// RegisterInstance(Lifetime.Scoped)
     /// </summary>
-    public class ScopedInstanceBuilder : RegistrationBuilder, IRegistration
+    public class ScopedInstanceBuilder : RegistrationBuilder
     {
-        readonly object implementationInstance;
+        private readonly object _instance;
 
         public ScopedInstanceBuilder(object implementationInstance)
             : base(implementationInstance.GetType(), Lifetime.Scoped)
         {
-            this.implementationInstance = implementationInstance;
+            _instance = implementationInstance;
         }
 
-        public override IRegistration Build() => this;
+        public override Registration Build()
+        {
+            var spawner = new SceneInstanceProvider(_instance);
+            return new Registration(
+                ImplementationType,
+                Lifetime,
+                InterfaceTypes,
+                spawner);
+        }
+    }
 
-        public object SpawnInstance(IObjectResolver resolver) => implementationInstance;
+    class SceneInstanceProvider : IInstanceProvider
+    {
+        private readonly object _instance;
 
-        public Type ImplementationType => implementationInstance.GetType();
+        public SceneInstanceProvider(object instance)
+        {
+            _instance = instance;
+        }
 
-        public IReadOnlyList<Type> InterfaceTypes { get; }
-
-        public Lifetime Lifetime { get; }
+        public object SpawnInstance(IObjectResolver resolver)
+        {
+            return _instance;
+        }
     }
 }

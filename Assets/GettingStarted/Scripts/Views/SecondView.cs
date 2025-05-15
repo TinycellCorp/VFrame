@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer;
 using VFrame.UI.View;
 
 namespace GettingStarted.Views
@@ -16,11 +17,19 @@ namespace GettingStarted.Views
 
         public override void OnEnter()
         {
-            Debug.Log(nameof(SecondView));
+            Debug.Log(nameof(SecondView) + $" {_person.Name}");
         }
 
         public override void OnExit()
         {
+        }
+
+        private Person _person;
+        
+        [Inject]
+        public void Constructor(Person person)
+        {
+            _person = person;
         }
     }
 }
