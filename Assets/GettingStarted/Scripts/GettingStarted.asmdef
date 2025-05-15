@@ -1,0 +1,19 @@
+{
+    "name": "GettingStarted",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
+        "GUID:a558a6f8e0c921d4d9dc294a74ad2400",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:388c04714f5df1643bab308b3cacc89c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

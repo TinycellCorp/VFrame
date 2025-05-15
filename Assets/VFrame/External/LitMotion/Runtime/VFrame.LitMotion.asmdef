@@ -1,0 +1,26 @@
+{
+    "name": "VFrame.LitMotion",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a558a6f8e0c921d4d9dc294a74ad2400",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:3b570a5146f9d4f0fa107ed4559471a3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "VFRAME_LITMOTION_SUPPORT"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.annulusgames.lit-motion",
+            "expression": "",
+            "define": "VFRAME_LITMOTION_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}
