@@ -52,16 +52,16 @@ namespace VFrame.UI.Command
                 }
                 else
                 {
+                    outView.OnExit();
                     await outAnimation.Out(outView);
                     outView.IsActive = false;
-                    outView.OnExit();
                 }
             }
             else
             {
+                outView.OnExit();
                 await outAnimation.Out(outView);
                 outView.IsActive = false;
-                outView.OnExit();
             }
         }
     }

@@ -66,8 +66,8 @@ namespace VFrame.UI.Module.Popup
             else
             {
                 var nextView = _views.Peek();
-                RepositionShadow(_shadow, nextView);
                 await context.Command.Pop();
+                RepositionShadow(_shadow, nextView);
             }
         }
 
