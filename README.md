@@ -4,8 +4,6 @@
 - [HelloWorld](#hello-world)
 - [Animation](#animation)
 
-[Sample Project](https://github.com/qkrsogusl3/VFrameGettingStarted)
-
 Installation
 ===
 
@@ -14,7 +12,6 @@ Dependencies
 
 * [UniTask](https://github.com/Cysharp/UniTask)
 * [VContainer](https://github.com/hadashiA/VContainer)
-* [DoTween](https://openupm.com/packages/com.demigiant.dotween/)
 
 Manifest
 ---
@@ -24,20 +21,9 @@ Manifest
 ```json
 {
     "dependencies": {
-        "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-        "jp.hadashikick.vcontainer": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer#1.9.0",
-        "com.demigiant.dotween": "1.2.632"
-    },
-    "scopedRegistries": [
-        {
-            "name": "package.openupm.com",
-            "url": "https://package.openupm.com",
-            "scopes": [
-                "com.openupm",
-                "com.demigiant.dotween"
-            ]
-        }
-    ]
+        "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10",
+        "jp.hadashikick.vcontainer": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer#1.16.8"
+    }
 }
 ```
 
@@ -45,7 +31,7 @@ Add Package from git url
 ---
 
 ```
-https://github.com/qkrsogusl3/VFrame.git?path=Assets/VFrame
+https://github.com/TinycellCorp/VFrame.git?path=Assets/VFrame#1.0.0
 ```
 
 Hello World
