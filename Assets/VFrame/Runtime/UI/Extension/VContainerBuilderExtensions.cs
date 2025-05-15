@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.ResourceManagement.ResourceProviders;
 using VFrame.Extension;
 using VFrame.UI.Animation;
 using VFrame.UI.Command.Route;
@@ -13,16 +12,17 @@ using VFrame.UI.Tab;
 using VFrame.UI.Transition;
 using VFrame.UI.View;
 using VContainer;
-using VContainer.Internal;
 using VContainer.Unity;
 using VFrame.Audio;
 using VFrame.Core;
 using VFrame.UI.Context;
 using VFrame.UI.Module.Message;
 using VFrame.UI.Pool;
-using VFrame.UI.SubScene;
-using IInstanceProvider = VContainer.IInstanceProvider;
 using Object = UnityEngine.Object;
+
+#if USE_VCONTAINER_INSTANCE_PROVIDER
+using IInstanceProvider = VContainer.IInstanceProvider;
+#endif
 
 namespace VFrame.UI.Extension
 {
@@ -319,6 +319,7 @@ namespace VFrame.UI.Extension
         }
     }
 
+#if USE_VCONTAINER_INSTANCE_PROVIDER
     /// <summary>
     /// RegisterInstance(Lifetime.Scoped).AsImplementedInterfaces()
     /// </summary>
@@ -385,4 +386,57 @@ namespace VFrame.UI.Extension
             return _instance;
         }
     }
+
+#else
+    /// <summary>
+    /// RegisterInstance(Lifetime.Scoped).AsImplementedInterfaces()
+    /// </summary>
+    public class ScopedInstanceWithInterfacesBuilder : RegistrationBuilder, IRegistration
+    {
+        readonly object implementationInstance;
+
+        public ScopedInstanceWithInterfacesBuilder(object implementationInstance)
+            : base(implementationInstance.GetType(), Lifetime.Scoped)
+        {
+            this.implementationInstance = implementationInstance;
+            var interfaceTypes = new List<Type> { ImplementationType };
+            interfaceTypes.AddRange(ImplementationType.GetInterfaces());
+            InterfaceTypes = interfaceTypes;
+        }
+
+        public override IRegistration Build() => this;
+
+        public object SpawnInstance(IObjectResolver resolver) => implementationInstance;
+
+        public Type ImplementationType => implementationInstance.GetType();
+
+        public IReadOnlyList<Type> InterfaceTypes { get; }
+
+        public Lifetime Lifetime { get; }
+    }
+
+    /// <summary>
+    /// RegisterInstance(Lifetime.Scoped)
+    /// </summary>
+    public class ScopedInstanceBuilder : RegistrationBuilder, IRegistration
+    {
+        readonly object implementationInstance;
+
+        public ScopedInstanceBuilder(object implementationInstance)
+            : base(implementationInstance.GetType(), Lifetime.Scoped)
+        {
+            this.implementationInstance = implementationInstance;
+        }
+
+        public override IRegistration Build() => this;
+
+        public object SpawnInstance(IObjectResolver resolver) => implementationInstance;
+
+        public Type ImplementationType => implementationInstance.GetType();
+
+        public IReadOnlyList<Type> InterfaceTypes { get; }
+
+        public Lifetime Lifetime { get; }
+    }
+#endif
 }

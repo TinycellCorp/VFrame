@@ -16,6 +16,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "jp.hadashikick.vcontainer",
+            "expression": "1.16.8",
+            "define": "USE_VCONTAINER_INSTANCE_PROVIDER"
+        }
+    ],
     "noEngineReferences": false
 }
