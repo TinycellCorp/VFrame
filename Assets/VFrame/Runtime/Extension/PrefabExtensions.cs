@@ -35,8 +35,10 @@ namespace VFrame.Extension
             {
                 if (_wasActive)
                 {
-                    _prefab.gameObject.SetActive(true);
-                    _instance.gameObject.SetActive(true);
+                    if (_prefab != null && _prefab.gameObject != null)
+                        _prefab.gameObject.SetActive(true);
+                    if (_instance != null && _instance.gameObject != null)
+                        _instance.gameObject.SetActive(true);
                 }
             }
         }
@@ -70,8 +72,10 @@ namespace VFrame.Extension
             {
                 if (_wasActive)
                 {
-                    _prefab.SetActive(true);
-                    _instance.SetActive(true);
+                    if (_prefab != null)
+                        _prefab.SetActive(true);
+                    if (_instance != null)
+                        _instance.SetActive(true);
                 }
             }
         }
